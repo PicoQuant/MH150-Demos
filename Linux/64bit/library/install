@@ -1,0 +1,33 @@
+#!/bin/sh
+
+if [ `getconf LONG_BIT` = "64" ]
+then
+    echo "64 bit systen detected, OK."
+else
+    echo "This is not a 64-bit sytsem. Installation aborted."
+    exit 1
+fi
+
+mkdir -p /usr/local/lib64/mh150
+cp mhlib.so /usr/local/lib64/mh150/
+chmod 755 /usr/local/lib64/mh150/mhlib.so
+cp mhlib.h  /usr/local/lib64/mh150/
+cp mhdefin.h  /usr/local/lib64/mh150/
+cp errorcodes.h  /usr/local/lib64/mh150/
+chmod 644 /usr/local/lib64/mh150/*.h
+
+# the following is a hack for Lazarus that has trouble
+# if the library is not following the naming convention
+# libXXX.so and also does not find the lib at runtime if it
+# is not in the libary search path 
+# Since distributions are not consistent as to where the x64 
+# libdir is, we make a crude check if /usr/lib64 exists 
+
+if [ -d "/usr/lib64" ]
+then
+    echo "Directory /usr/lib64 exists, assuming libdir for x64 is /usr/lib64"
+    ln -f /usr/local/lib64/mh150/mhlib.so /usr/lib64/libmh150.so
+else
+    echo "Directory /usr/lib64 not found, assuming libdir for x64 is /usr/lib"
+    ln -f /usr/local/lib64/mh150/mhlib.so /usr/lib/libmh150.so
+fi

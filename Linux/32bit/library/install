@@ -1,0 +1,24 @@
+#!/bin/sh
+
+if [ `getconf LONG_BIT` = "32" ]
+then
+    echo "32 bit systen detected, OK."
+else
+    echo "This is not a 32-bit sytsem. Installation aborted."
+    exit 1
+fi
+
+mkdir -p /usr/local/lib/mh150
+cp mhlib.so /usr/local/lib/mh150/
+chmod 755 /usr/local/lib/mh150/mhlib.so
+cp mhlib.h  /usr/local/lib/mh150/
+cp mhdefin.h  /usr/local/lib/mh150/
+cp errorcodes.h  /usr/local/lib/mh150/
+chmod 644 /usr/local/lib/mh150/*.h
+
+# the following is a hack for Lazarus and C# that have trouble
+# if the library is not following the naming convention
+# libXXX.so and also does not find the lib at runtime if it
+# is not in the libary search path 
+ln -f /usr/local/lib/mh150/mhlib.so /usr/lib/libmh150.so
+
