@@ -88,9 +88,9 @@ Alternatively you can use the Control Panel Wizard 'Add/Remove Programs'
 https://support.picoquant.com
 
 PicoQuant GmbH \
-Rudower Chaussee 29 \\
-12489 Berlin, Germany \\
-Phone +49 30 1208820-0 \\
-Fax   +49 30 1208820-90 \\
-email info@picoquant.com \\
+Rudower Chaussee 29 \
+12489 Berlin, Germany \
+Phone +49 30 1208820-0 \
+Fax   +49 30 1208820-90 \
+email info@picoquant.com \
 www http://www.picoquant.com 
