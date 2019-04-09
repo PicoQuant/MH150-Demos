@@ -87,7 +87,7 @@ Alternatively you can use the Control Panel Wizard 'Add/Remove Programs'
 # Contact and Support
 https://support.picoquant.com
 
-PicoQuant GmbH \\
+PicoQuant GmbH \
 Rudower Chaussee 29 \\
 12489 Berlin, Germany \\
 Phone +49 30 1208820-0 \\
