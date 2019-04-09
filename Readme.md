@@ -57,7 +57,7 @@ provided as part of the MultiHarp software distribution media.
 Products and corporate names appearing in the product manuals or in the
 online documentation may or may not be registered trademarks or copyrights
 of their respective owners. They are used only for identification or
-explanation and to the owner�s benefit, without intent to infringe.
+explanation and to the owner's benefit, without intent to infringe.
 
 
 # Installation
@@ -85,11 +85,12 @@ Alternatively you can use the Control Panel Wizard 'Add/Remove Programs'
 
 
 # Contact and Support
+https://support.picoquant.com
 
-PicoQuant GmbH
-Rudower Chaussee 29
-12489 Berlin, Germany
-Phone +49 30 1208820-0
-Fax   +49 30 1208820-90
-email info@picoquant.com
-www http://www.picoquant.com
+PicoQuant GmbH \\
+Rudower Chaussee 29 \\
+12489 Berlin, Germany \\
+Phone +49 30 1208820-0 \\
+Fax   +49 30 1208820-90 \\
+email info@picoquant.com \\
+www http://www.picoquant.com 
