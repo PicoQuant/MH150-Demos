@@ -1,6 +1,7 @@
 # MHLib Programming Library for MultiHarp 150
-Version 1.0.0.0
-PicoQuant GmbH - Sept 2018
+
+Version 2.0.0.0
+PicoQuant GmbH - May 2020
 
 
 
@@ -14,6 +15,22 @@ including the x64 versions.
 The programming library is a DLL with demos for various programming
 languages. Please refer to the manual (PDF) for instructions.
 
+## What's new in version 2.0
+
+- Supporting the new high resolution models MultiHarp 150  4P/8P/16P 
+- Providing a new device driver supporting "secure boot" with Windows 10 
+- Some minor bugfixes 
+
+
+## What was new in version 1.1
+
+- Support for the new 16-channel hardware
+- Programmable dead-time(*
+- Some minor bugfixes
+
+(* this new feature requires firmware version 0.8 or higher. 
+An updater tool to version 0.8 is provided in the distribution media
+folder gateware_update.
 
 ## Disclaimer
 
