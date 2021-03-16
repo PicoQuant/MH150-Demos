@@ -1,9 +1,11 @@
-# Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v1.0.
+# Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v2.0.
 # The program performs a measurement based on hard coded settings.
 # The resulting data is stored in a binary output file.
 #
-# Keno Goertz, PicoQuant GmbH, September 2018
+# Keno Goertz, PicoQuant GmbH, July 2019
+# Michael Wahl, PicoQuant GmbH, May 2020
 
+import time
 import ctypes as ct
 from ctypes import byref
 import os
@@ -17,12 +19,12 @@ if sys.version_info[0] < 3:
     raw_input("press RETURN to continue"); print
 
 # From mhdefin.h
-LIB_VERSION = "1.0"
+LIB_VERSION = "2.0"
 MAXDEVNUM = 8
 MODE_T2 = 2
 MODE_T3 = 3
 MAXLENCODE = 6
-MAXINPCHAN = 8
+MAXINPCHAN = 16
 TTREADMAX = 1048576
 FLAG_OVERFLOW = 0x0001
 FLAG_FIFOFULL = 0x0002
@@ -45,7 +47,7 @@ libVersion = ct.create_string_buffer(b"", 8)
 hwSerial = ct.create_string_buffer(b"", 8)
 hwPartno = ct.create_string_buffer(b"", 8)
 hwVersion = ct.create_string_buffer(b"", 8)
-hwModel = ct.create_string_buffer(b"", 16)
+hwModel = ct.create_string_buffer(b"", 24)
 errorString = ct.create_string_buffer(b"", 40)
 numChannels = ct.c_int()
 resolution = ct.c_double()
@@ -58,7 +60,7 @@ warnings = ct.c_int()
 warningstext = ct.create_string_buffer(b"", 16384)
 
 if os.name == "nt":
-    mhlib = ct.WinDLL("mhlib.dll")
+    mhlib = ct.WinDLL("mhlib64.dll")
 else:
     mhlib = ct.CDLL("libmh150.so")
 

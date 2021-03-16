@@ -1,18 +1,18 @@
 
-% Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v 1.0.
+% Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v 2.0.
 % The program performs a measurement based on hard coded settings.
-% The resulting histogram (65536 channels) is stored in an ASCII output file.
+% The resulting histogram (65536 bins) is stored in an ASCII output file.
 %
-% Axel Hagen, PicoQuant, August 2018
+% Axel Hagen, PicoQuant, May 2020
 
 
 % Constants from mhdefin.h
 
-REQLIBVER   =     '1.0';    % this is the version this program expects
+REQLIBVER   =     '2.0';    % this is the version this program expects
 MAXDEVNUM   =         8;
 MAXHISTBINS =     65536;	 % number of histogram channels
 MAXLENCODE  =         6;	 % max histogram length is 65536	
-MAXBINSTEPS	=    	 26;
+MAXBINSTEPS =        23;
 MODE_HIST   =         0;
 MODE_T2	    =         2;
 MODE_T3	    =         3;
@@ -34,14 +34,14 @@ MH_ERROR_DEVICE_OPEN_FAIL		 = -1;
 % Settings for the measurement, Adapt to your setup!
 
 SyncTrgEdge   =    0;     %  you can change this
-SyncTrgLevel  =  -50;     %  you can change this
+SyncTrgLevel  = -100;     %  you can change this
 InputTrgEdge  =    0;     %  you can change this
-InputTrgLevel =  -50;     %  you can change this
-SyncDiv       =    8;     %  you can change this
+InputTrgLevel = -100;     %  you can change this
+SyncDiv       =    1;     %  you can change this
 Binning       =    0;     %  you can change this
 Tacq          = 1000;     %  you can change this      
     
-fprintf('\nMultiHarp 150 MHLib Demo Application             PicoQuant 2018\n');
+fprintf('\nMultiHarp 150 MHLib Demo Application             PicoQuant 2020\n');
 
 if (~libisloaded('MHlib'))    
     %Attention: The header file name given below is case sensitive and must
@@ -51,8 +51,30 @@ if (~libisloaded('MHlib'))
     %be able to access the library!
     %The alias is used to provide a fixed spelling for any further access via
     %calllib() etc, which is also case sensitive.
+    
+    %To load the right dll for OS and bitness we use the mexext command.
+    %Therefor the next four lines, demonstrating the old manual way, have
+    %been commented.
+    
     %loadlibrary('Mhlib.dll',   'mhlib.h', 'alias', 'MHlib'); % Windows 32 bit
-    loadlibrary('MHLib64.dll', 'mhlib.h', 'alias', 'MHlib'); % Windows 64 bit
+    %loadlibrary('MHLib64.dll', 'mhlib.h', 'alias', 'MHlib'); % Windows 64 bit 
+    %loadlibrary('/usr/local/lib/mh150/mhlib.so', 'mhlib.h', 'alias', 'MHlib'); % Linux 32 bit       
+    %loadlibrary('/usr/local/lib64/mh150/mhlib.so', 'mhlib.h', 'alias', 'MHlib'); % Linux 64 bit
+    
+    OS = mexext;
+    if strcmp('mexw32', OS)
+        DLL = 'MHLib.dll';                        % Windows 32 bit
+    elseif strcmp('mexw64', OS)
+        DLL = 'MHLib64.dll';                      % Windows 64 bit
+    elseif strcmp('mexa32', OS)
+        DLL = '/usr/local/lib/mh150/mhlib.so';    % Linux 32 bit
+    elseif strcmp('mexa64', OS)
+        DLL = '/usr/local/lib64/mh150/mhlib.so';  % Linux 64 bit
+    else
+        fprintf('\nNo supported OS\n');
+        return;
+    end
+    loadlibrary(DLL, 'mhlib.h', 'alias', 'MHlib');
 else
     fprintf('Note: MHlib was already loaded\n');
 end
@@ -141,7 +163,7 @@ if(ret<0)
 end 
 
 %this is only for information
-Model      = blanks(16); %enough length!
+Model      = blanks(24); %enough length!
 Partno     = blanks(8); %enough length!
 Version    = blanks(8); %enough length!
 ModelPtr   = libpointer('cstring', Model);

@@ -1,6 +1,6 @@
 /************************************************************************
 
-  Demo access to MultiHarp 150 Hardware via MHLIB v 1.0
+  Demo access to MultiHarp 150 Hardware via MHLIB v 2.0
 
   THSI IS AN ADVANCED DEMO. DO NOT USE FOR YOUR FIRST EXPERIMENTS.
   Look at the variable meascontrol down below to see what it does.
@@ -8,27 +8,35 @@
   The program performs a measurement based on hardcoded settings.
   The resulting histogram is stored in an ASCII output file.
 
-  Michael Wahl, PicoQuant GmbH, Sept 2018
+  Michael Wahl, PicoQuant GmbH, May 2020
 
   Note: This is a console application (i.e. run in Windows cmd box)
 
   Note: At the API level channel numbers are indexed 0..N-1 
     where N is the number of channels the device has.
 
-  
+
   Tested with the following compilers:
 
-  - MinGW 2.0.0 (32 bit)
-  - MinGW-W64 4.3.5 (64 bit)
-  - MS Visual C++ 6.0 (32 bit)
-  - MS Visual C++ 2013 and 2015 (32 and 64 bit)
+  - MinGW 2.0.0 (Windows 32 bit)
+  - MinGW-W64 4.3.5 (Windows 64 bit)
+  - MS Visual C++ 6.0 (Windows 32 bit)
+  - MS Visual C++ 2015 and 2019 (Windows 32 and 64 bit)
+  - gcc 4.8.3 and 7.5.0 (64 bit)
 
 ************************************************************************/
 
+#ifndef _WIN32
+#include <unistd.h>
+#define Sleep(msec) usleep(msec*1000)
+#define __int64 long long
+#else
 #include <windows.h>
 #include <dos.h>
-#include <stdio.h>
 #include <conio.h>
+#endif
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -48,7 +56,7 @@ int main(int argc, char* argv[])
   int retcode;
   int ctcstatus;
   char LIB_Version[8];
-  char HW_Model[16];
+  char HW_Model[32];
   char HW_Partno[8];
   char HW_Version[16];
   char HW_Serial[16];
@@ -88,7 +96,7 @@ int main(int argc, char* argv[])
   memset(Errorstring, 0x00, sizeof(Errorstring));
   memset(warningstext, 0x00, sizeof(warningstext));
 
-  printf("\nMultiHarp 150 MHLib Demo Application               PicoQuant GmbH, 2018");
+  printf("\nMultiHarp 150 MHLib Demo Application               PicoQuant GmbH, 2020");
   printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   MH_GetLibraryVersion(LIB_Version);
   printf("\nLibrary version is %s", LIB_Version);
@@ -144,10 +152,10 @@ int main(int argc, char* argv[])
 
   printf("\nUsing device #%1d", dev[0]);
 
-  fprintf(fpout, "Binning           : %ld\n", Binning);
-  fprintf(fpout, "Offset            : %ld\n", Offset);
-  fprintf(fpout, "AcquisitionTime   : %ld\n", Tacq);
-  fprintf(fpout, "SyncDivider       : %ld\n", SyncDivider);
+  fprintf(fpout, "Binning           : %d\n", Binning);
+  fprintf(fpout, "Offset            : %d\n", Offset);
+  fprintf(fpout, "AcquisitionTime   : %d\n", Tacq);
+  fprintf(fpout, "SyncDivider       : %d\n", SyncDivider);
 
   printf("\nInitializing the device...");
 
@@ -324,7 +332,7 @@ int main(int argc, char* argv[])
   retcode = MH_SetMeasControl(dev[0], meascontrol , edge1, edge2);
   if(retcode<0)
   {
-    printf("\nMH_SetMeasControl error %ld. Aborted.\n",retcode);
+    printf("\nMH_SetMeasControl error %d. Aborted.\n",retcode);
     goto ex;
   }
 
@@ -381,7 +389,7 @@ int main(int argc, char* argv[])
         retcode = MH_CTCStatus(dev[0], &ctcstatus);
         if(retcode<0)
         {
-          printf("\nMH_CTCStatus error %ld. Aborted.\n",retcode);
+          printf("\nMH_CTCStatus error %d. Aborted.\n",retcode);
           goto ex;
         }
       }

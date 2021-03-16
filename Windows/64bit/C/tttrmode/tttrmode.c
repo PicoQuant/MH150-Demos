@@ -1,10 +1,10 @@
 /************************************************************************
 
-Demo access to MultiHarp 150 Hardware via MHLIB v.1.0
+Demo access to MultiHarp 150 Hardware via MHLIB v.2.0
 The program performs a measurement based on hardcoded settings.
 The resulting event data is stored in a binary output file.
 
-PicoQuant GmbH, Sept. 2018
+Michael Wahl, PicoQuant GmbH, May 2020
 
 Note: This is a console application (i.e. run in Windows cmd box)
 
@@ -17,21 +17,22 @@ It does not write a file header as regular .ht* files have it.
 
 Tested with the following compilers:
 
-  - MinGW 2.0.0 (32 bit)
-  - MinGW-W64 4.3.5 (64 bit)
-  - MS Visual C++ 6.0 (32 bit)
-  - MS Visual C++ 2013 and 2015 (32 and 64 bit)
+  - MinGW 2.0.0 (Windows 32 bit)
+  - MinGW-W64 4.3.5 (Windows 64 bit)
+  - MS Visual C++ 6.0 (Windows 32 bit)
+  - MS Visual C++ 2015 and 2019 (Windows 32 and 64 bit)
+  - gcc 4.8.3 and 7.5.0 (64 bit)
 
 ************************************************************************/
 
-
-#ifdef _WIN32
+#ifndef _WIN32
+#include <unistd.h>
+#define Sleep(msec) usleep(msec*1000)
+#define __int64 long long
+#else
 #include <windows.h>
 #include <dos.h>
 #include <conio.h>
-#else
-#include <unistd.h>
-#define Sleep(msec) usleep(msec*1000)
 #endif
 
 #include <stdio.h>
@@ -83,7 +84,7 @@ int main(int argc, char* argv[])
   unsigned int Progress;
 
 
-  printf("\nMultiHarp 150 MHLib.DLL Demo Application              PicoQuant GmbH, 2018");
+  printf("\nMultiHarp 150 MHLib.DLL Demo Application              PicoQuant GmbH, 2020");
   printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   MH_GetLibraryVersion(LIB_Version);
   printf("\nLibrary version is %s\n", LIB_Version);
@@ -175,15 +176,15 @@ int main(int argc, char* argv[])
 
   printf("\n\nUsing the following settings:\n");
 
-  printf("Mode              : %ld\n", Mode);
-  printf("Binning           : %ld\n", Binning);
-  printf("Offset            : %ld\n", Offset);
-  printf("AcquisitionTime   : %ld\n", Tacq);
-  printf("SyncDivider       : %ld\n", SyncDivider);
-  printf("SyncTiggerEdge    : %ld\n", SyncTiggerEdge);
-  printf("SyncTriggerLevel  : %ld\n", SyncTriggerLevel);
-  printf("InputTriggerEdge  : %ld\n", InputTriggerEdge);
-  printf("InputTriggerLevel : %ld\n", InputTriggerLevel);
+  printf("Mode              : %d\n", Mode);
+  printf("Binning           : %d\n", Binning);
+  printf("Offset            : %d\n", Offset);
+  printf("AcquisitionTime   : %d\n", Tacq);
+  printf("SyncDivider       : %d\n", SyncDivider);
+  printf("SyncTiggerEdge    : %d\n", SyncTiggerEdge);
+  printf("SyncTriggerLevel  : %d\n", SyncTriggerLevel);
+  printf("InputTriggerEdge  : %d\n", InputTriggerEdge);
+  printf("InputTriggerLevel : %d\n", InputTriggerLevel);
 
 
   retcode = MH_SetSyncDiv(dev[0], SyncDivider);
@@ -361,6 +362,7 @@ int main(int argc, char* argv[])
       }
       Progress += nRecords;
       printf("\b\b\b\b\b\b\b\b\b\b\b\b%12u", Progress);
+      fflush(stdout);
     }
     else
     {

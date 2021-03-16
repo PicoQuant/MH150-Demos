@@ -2,7 +2,7 @@
     MHLib programming library for MultiHarp 150
     PicoQuant GmbH 
 
-    Ver. 1.0.0.0     Sept. 2018
+    Ver. 2.0.0.0     May 2020
 */
 
 #ifndef _WIN32
@@ -27,9 +27,11 @@ extern int _stdcall MH_GetNumOfInputChannels(int devidx, int* nchannels);
 extern int _stdcall MH_SetSyncDiv(int devidx, int div);
 extern int _stdcall MH_SetSyncEdgeTrg(int devidx, int level, int edge);
 extern int _stdcall MH_SetSyncChannelOffset(int devidx, int value);
+extern int _stdcall MH_SetSyncDeadTime(int devidx, int on, int deadtime);  //new since v1.1
 
 extern int _stdcall MH_SetInputEdgeTrg(int devidx, int channel, int level, int edge);
 extern int _stdcall MH_SetInputChannelOffset(int devidx, int channel, int value);
+extern int _stdcall MH_SetInputDeadTime(int devidx, int channel, int on, int deadtime);  //new since v1.1
 extern int _stdcall MH_SetInputChannelEnable(int devidx, int channel, int enable);
 
 extern int _stdcall MH_SetStopOverflow(int devidx, int stop_ovfl, unsigned int stopcount);	

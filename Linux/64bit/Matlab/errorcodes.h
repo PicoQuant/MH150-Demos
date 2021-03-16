@@ -2,7 +2,7 @@
     MHLib programming library for MultiHarp 150
     PicoQuant GmbH 
 
-    Ver. 1.0.0.0     Sept. 2018
+    Ver. 2.0.0.0     May 2020
 */
 
 #define MH_ERROR_NONE                                      0 
@@ -54,13 +54,13 @@
 #define MH_ERROR_REFSEL_FAIL                             -47 
 #define MH_ERROR_STATUS_FAIL                             -48 	
 #define MH_ERROR_MODNUM_FAIL                             -49 
-#define MH_ERROR_DIGMUX_FAIL                             -50 			
+#define MH_ERROR_DIGMUX_FAIL                             -50	
 #define MH_ERROR_MODMUX_FAIL                             -51 
 #define MH_ERROR_MODFWPCB_MISMATCH                       -52 	
 #define MH_ERROR_MODFWVER_MISMATCH                       -53 
 #define MH_ERROR_MODPROPERTY_MISMATCH                    -54 	
 #define MH_ERROR_INVALID_MAGIC                           -55  
-#define MH_ERROR_INVALID_LENGTH                          -56  			
+#define MH_ERROR_INVALID_LENGTH                          -56	
 #define MH_ERROR_RATE_FAIL                               -57  	
 #define MH_ERROR_MODFWVER_TOO_LOW                        -58
 #define MH_ERROR_MODFWVER_TOO_HIGH                       -59

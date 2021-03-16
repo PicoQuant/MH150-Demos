@@ -2,7 +2,7 @@
     MHLib programming library for MultiHarp 150
     PicoQuant GmbH 
 
-    Ver. 1.0.0.0     Sept. 2018
+    Ver. 2.0.0.0     May 2020
 */
 
 using System;

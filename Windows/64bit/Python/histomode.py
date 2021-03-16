@@ -1,21 +1,31 @@
-# Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v1.0.
+# Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v2.0.
 # The program performs a measurement based on hard coded settings.
 # The resulting histogram (65536 channels) is stored in an ASCII output file.
 #
-# Keno Goertz, PicoQuant GmbH, September 2018
+# Keno Goertz, PicoQuant GmbH, July 2019
+# Michael Wahl, PicoQuant GmbH, May 2020
 
 import time
 import ctypes as ct
 from ctypes import byref
+import os
+import sys
+import time
+
+if sys.version_info[0] < 3:
+    print("[Warning] Python 2 is not fully supported. It might work, but "
+          "use Python 3 if you encounter errors.\n")
+    raw_input("press RETURN to continue"); print
+    input = raw_input
 
 # From mhdefin.h
-LIB_VERSION = "1.0"
+LIB_VERSION = "2.0"
 MAXDEVNUM = 8
 MODE_HIST = 0
 MAXLENCODE = 6
-MAXINPCHAN = 8
+MAXINPCHAN = 16
 MAXHISTLEN = 65536
-FLAG_OVERFLOW = 0x001
+FLAG_OVERFLOW = 0x0001
 
 # Measurement parameters, these are hardcoded since this is just a demo
 binning = 0 # you can change this
@@ -35,7 +45,7 @@ libVersion = ct.create_string_buffer(b"", 8)
 hwSerial = ct.create_string_buffer(b"", 8)
 hwPartno = ct.create_string_buffer(b"", 8)
 hwVersion = ct.create_string_buffer(b"", 8)
-hwModel = ct.create_string_buffer(b"", 16)
+hwModel = ct.create_string_buffer(b"", 24)
 errorString = ct.create_string_buffer(b"", 40)
 numChannels = ct.c_int()
 histLen = ct.c_int()
@@ -46,7 +56,10 @@ flags = ct.c_int()
 warnings = ct.c_int()
 warningstext = ct.create_string_buffer(b"", 16384)
 
-mhlib = ct.CDLL("mhlib64.dll")
+if os.name == "nt":
+    mhlib = ct.WinDLL("mhlib64.dll")
+else:
+    mhlib = ct.CDLL("libmh150.so")
 
 def closeDevices():
     for i in range(0, MAXDEVNUM):

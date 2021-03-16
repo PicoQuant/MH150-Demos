@@ -2,7 +2,7 @@
     MHLib programming library for MultiHarp 150
     PicoQuant GmbH 
 
-    Ver. 1.0.0.0     Sept. 2018
+    Ver. 2.0.0.0     May 2020
 */
 
 using System;
@@ -24,7 +24,6 @@ public static class mhlib
     const string MHLib = "libmh150"; //note this is a symlink to mhlib.so
   #endif
   
-//  public const string TargetLibVersion = "1.0";  //this is what this program was written for
 
   [DllImport(MHLib)]
   extern public static int MH_GetLibraryVersion(StringBuilder vers);
@@ -57,11 +56,15 @@ public static class mhlib
   extern public static int MH_SetSyncEdgeTrg(int devidx, int level, int edge);
   [DllImport(MHLib)]
   extern public static int MH_SetSyncChannelOffset(int devidx, int value);
+  [DllImport(MHLib)]
+  extern public static int MH_SetSyncDeadTime(int devidx, int on, int deadtime);  //new in v1.1
 
   [DllImport(MHLib)]
   extern public static int MH_SetInputEdgeTrg(int devidx, int channel, int level, int edge);
   [DllImport(MHLib)]
   extern public static int MH_SetInputChannelOffset(int devidx, int channel, int value);
+  [DllImport(MHLib)]
+  extern public static int MH_SetInputDeadTime(int devidx, int channel, int on, int deadtime);  //new in v1.1
   [DllImport(MHLib)]
   extern public static int MH_SetInputChannelEnable(int devidx, int channel, int enable);
 
@@ -90,7 +93,7 @@ public static class mhlib
   [DllImport(MHLib)]
   extern public static int MH_GetHistogram(int devidx, uint[] chcount, int channel);
   [DllImport(MHLib)]
-  extern public static int MH_GetAllHistogram(int devidx, uint[] chcount);
+  extern public static int MH_GetAllHistograms(int devidx, uint[] chcount);
   [DllImport(MHLib)]
   extern public static int MH_GetResolution(int devidx, ref double resolution);
   [DllImport(MHLib)]

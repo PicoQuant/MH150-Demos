@@ -2,44 +2,78 @@ Unit MHLib;
 {                                                               }
 { Functions exported by the MultiHarp programming library MHLib }
 {                                                               }
-{ Ver. 1.0      August 2018                                     }
+{ Ver. 2.0      May 2020                                        }
 {                                                               }
 
 interface
 
 const
-  LIB_VERSION    =      '1.0';
+  LIB_VERSION    =      '2.0';
+{$UNDEF PLATFORM_OK}
+{$IFDEF WIN32}
+  LIB_NAME       =      'mhlib.dll';  // Windows 32 bit
+  {$DEFINE PLATFORM_OK}
+{$ENDIF}
 {$IFDEF WIN64}
-  LIB_NAME       =      'mhlib64.dll';  //Windows 32 bit
-{$ELSE}
-  LIB_NAME       =      'mhlib.dll';    //Windows 64 bit
+  LIB_NAME       =      'mhlib64.dll';    // Windows 64 bit
+  {$DEFINE PLATFORM_OK}
+{$ENDIF}
+{$IFDEF LINUX}
+  LIB_NAME       =      'libmh150.so';  // Linux 32 or 64 bit
+  {$DEFINE PLATFORM_OK}
+{$ENDIF}
+{$IFNDEF PLATFORM_OK}
+  {$FATAL OS platform not supported}
 {$ENDIF}
 
   MAXDEVNUM      =          8;   // max num of USB devices
 
-  MHMAXINPCHAN   =          8;   // max num of physicl input channels
+  MHMAXINPCHAN   =         16;   // max num of physicl input channels
 
-  MAXBINSTEPS    =         26;   // get actual number via HH_GetBaseResolution() !
+  MAXBINSTEPS    =         23;   // get actual number via HH_GetBaseResolution() !
 
   MAXHISTLEN     =      65536;   // max number of histogram bins
-  MAXLENCODE     =          6;   // max length code histo mode
 
   TTREADMAX      =     1048576;   // 1M event records can be read in one chunk
 
-  MODE_HIST      =          0;
-  MODE_T2        =          2;
-  MODE_T3        =          3;
+  //symbolic constants for MH_Initialize
+  REFSRC_INTERNAL          = 0; // use internal clock
+  REFSRC_EXTERNAL_10MHZ    = 1; // use 10MHz external clock
+  REFSRC_WR_MASTER_GENERIC = 2; // White Rabbit master with generic partner
+  REFSRC_WR_SLAVE_GENERIC  = 3; // White Rabbit slave with generic partner
+  REFSRC_WR_GRANDM_GENERIC = 4; // White Rabbit grand master with generic partner
+  REFSRC_EXTN_GPS_PPS      = 5; // use 10 MHz + PPS from GPS
+  REFSRC_EXTN_GPS_PPS_UART = 6; // use 10 MHz + PPS + time via UART from GPS
+  REFSRC_WR_MASTER_MHARP   = 7; // White Rabbit master with MultiHarp as partner
+  REFSRC_WR_SLAVE_MHARP    = 8; // White Rabbit slave with MultiHarp as partner
+  REFSRC_WR_GRANDM_MHARP   = 9; // White Rabbit grand master with MultiHarp as partner
 
+  //symbolic constants for MH_Initialize
+  MODE_HIST = 0;
+  MODE_T2   = 2;
+  MODE_T3   = 3;
+
+  //symbolic constants for MH_SetMeasControl
   MEASCTRL_SINGLESHOT_CTC     = 0;   //default
-  MEASCTRL_C1_GATE		        = 1;
+  MEASCTRL_C1_GATE            = 1;
   MEASCTRL_C1_START_CTC_STOP  = 2;
-  MEASCTRL_C1_START_C2_STOP	  = 3;
+  MEASCTRL_C1_START_C2_STOP   = 3;
   MEASCTRL_WR_M2S             = 4;
   MEASCTRL_WR_S2M             = 5;
 
+  //symb. const. for MH_SetMeasControl, MH_SetSyncEdgeTrg and MH_SetInputEdgeTrg
   EDGE_RISING    = 1;
   EDGE_FALLING   = 0;
 
+  //bitmasks for results from MH_GetFeatures
+  FEATURE_DLL       = $0001; // DLL License available
+  FEATURE_TTTR      = $0002; // TTTR mode available
+  FEATURE_MARKERS   = $0004; // Markers available
+  FEATURE_LOWRES    = $0008; // Long range mode available
+  FEATURE_TRIGOUT   = $0010; // Trigger output available
+  FEATURE_PROG_TD   = $0020; // Programmable deadtime available
+
+  //bitmasks for results from MH_GetFlags
   FLAG_OVERFLOW     =      $0001;   // histo mode only
   FLAG_FIFOFULL     =      $0002;   // TTTR mode only
   FLAG_SYNC_LOST    =      $0004;
@@ -48,29 +82,47 @@ const
   FLAG_ACTIVE       =      $0020;   // measurement is running
   FLAG_CNTS_DROPPED =      $0040;   // events dropped
 
-  SYNCDIVMIN      =          1;
-  SYNCDIVMAX      =         16;
+  //limits for MH_SetHistoLen
+  //note: length codes 0 and 1 will not work with MH_GetHistogram
+  //if you need these short lengths then use MH_GetAllHistograms
+  MINLENCODE  = 0;
+  MAXLENCODE  = 6; //default
 
+  //limits for MH_SetSyncDiv
+  SYNCDIVMIN =           1;
+  SYNCDIVMAX =          16;
+
+  //limits for MH_SetSyncEdgeTrg and MH_SetInputEdgeTrg
   TRGLVLMIN	      =      -1200;	 // mV  MH150 Nano only
   TRGLVLMAX	      =       1200;   // mV  MH150 Nano only
 
-  CHANOFFSMIN     =     -99999;   // ps
-  CHANOFFSMAX     =      99999;   // ps
+  //limits for MH_SetSyncChannelOffset and MH_SetInputChannelOffset
+  CHANOFFSMIN =     -99999; // ps
+  CHANOFFSMAX =      99999; // ps
 
-  OFFSETMIN       =          0;   // ns
-  OFFSETMAX       =  100000000;   // ns
+  //limits for MH_SetSyncDeadTime and MH_SetInputDeadTime
+  EXTDEADMIN  =        800; // ps
+  EXTDEADMAX  =     160000; // ps
 
-  ACQTMIN         =          1;   // ms
-  ACQTMAX         =  360000000;   // ms  (100*60*60*1000ms = 100h)
+  //limits for MH_SetOffset
+  OFFSETMIN =            0; // ns
+  OFFSETMAX =    100000000; // ns
 
-  STOPCNTMIN      =          1;
-  STOPCNTMAX      = 4294967295;   // 32 bit is mem max
+  //limits for MH_StartMeas
+  ACQTMIN =              1; // ms
+  ACQTMAX =      360000000; // ms  (100*60*60*1000ms = 100h)
 
-  TRIGOUTMIN      =          0;	 // 0 = off
-  TRIGOUTMAX      =   16777215;	 // in units of 100ns
+  //limits for MH_SetStopOverflow
+  STOPCNTMIN =            1;
+  STOPCNTMAX =   4294967295; // 32 bit is mem max
 
-  HOLDOFFMIN      =          0;  // ns
-  HOLDOFFMAX      =      25500;	 // ns
+  //limits for MH_SetTriggerOutput
+  TRIGOUTMIN =            0; // 0 = off
+  TRIGOUTMAX =     16777215; // in units of 100ns
+
+  //limits for MH_SetMarkerHoldoffTime
+  HOLDOFFMIN =            0;  // ns
+  HOLDOFFMAX =        25500;  // ns
 
 var
   pcLibVers      : pAnsiChar;
@@ -93,110 +145,67 @@ var
   iDevIdx        : array [0..MAXDEVNUM - 1] of LongInt;
 
 
-function  MH_GetLibraryVersion     (vers : pAnsiChar) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetErrorString        (errstring : pAnsiChar; errcode : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_GetLibraryVersion(Vers: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_GetErrorString(ErrString: PAnsiChar; ErrCode: LongInt): LongInt; stdcall; external LIB_NAME;
 
-function  MH_OpenDevice            (devidx : LongInt; serial : pAnsiChar) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_CloseDevice           (devidx : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_Initialize            (devidx : LongInt; mode : LongInt; refsource : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_OpenDevice(DevIdx: LongInt; Serial: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_CloseDevice(Devidx: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_Initialize(Devidx: LongInt; Mode: LongInt; RefSource: LongInt): LongInt; stdcall; external LIB_NAME;
 
 // all functions below can only be used after HH_Initialize
 
-function  MH_GetHardwareInfo       (devidx : LongInt; model : pAnsiChar; partno : pAnsiChar; version : pAnsiChar) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetSerialNumber       (devidx : LongInt; serial : pAnsiChar) : LongInt;
-  stdcall; external LIB_NAME;
-function MH_GetFeatures            (devidx : LongInt; var features : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetBaseResolution     (devidx : LongInt; var resolution : Double; var binsteps : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetNumOfInputChannels (devidx : LongInt; var nchannels : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_GetHardwareInfo(DevIdx: LongInt; Model: PAnsiChar; PartNo: PAnsiChar; Version: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_GetSerialNumber(DevIdx: LongInt; Serial: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_GetFeatures(DevIdx: LongInt; var Features: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetBaseResolution(DevIdx: LongInt; var Resolution: Double; var BinSteps: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetNumOfInputChannels(DevIdx: LongInt; var NChannels: LongInt): LongInt; stdcall; external LIB_NAME;
 
-function  MH_SetSyncDiv            (devidx : LongInt; syncdiv : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function MH_SetSyncEdgeTrg         (devidx : LongInt; level : LongInt; edge : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetSyncChannelOffset  (devidx : LongInt; value : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_SetSyncDiv(DevIdx: LongInt; SyncDiv: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetSyncEdgeTrg(DevIdx: LongInt; Level: LongInt; Edge: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetSyncChannelOffset(DevIdx: LongInt; Value: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetSyncDeadTime(Devidx: LongInt; IsOn: LongInt; DeadTime: LongInt): LongInt; stdcall; external LIB_NAME; //new in v1.1
 
-function MH_SetInputEdgeTrg        (devidx : LongInt; channel : LongInt; level : LongInt; edge : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetInputChannelOffset (devidx : LongInt; channel : LongInt; value : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetInputChannelEnable (devidx : LongInt; channel : LongInt; enable : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_SetInputEdgeTrg(DevIdx: LongInt; channel: LongInt; level: LongInt; edge: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetInputChannelOffset(DevIdx: LongInt; channel: LongInt; value: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetInputDeadTime(DevIdx: LongInt; Channel: LongInt; IsOn: LongInt; DeadTime: LongInt): LongInt; stdcall; external LIB_NAME; //new in v1.1
+function MH_SetInputChannelEnable(DevIdx: LongInt; channel: LongInt; enable: LongInt): LongInt; stdcall; external LIB_NAME;
 
-function  MH_SetStopOverflow       (devidx : LongInt; stop_ovfl : LongInt; stopcount : LongWord) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetBinning            (devidx : LongInt; binning : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetOffset             (devidx : LongInt; offset : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetHistoLen           (devidx : LongInt; lencode : LongInt; var actuallen : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetMeasControl        (devidx : LongInt; control : LongInt; startedge : LongInt; stopedge : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetTriggerOutput      (devidx : LongInt; period: LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_SetStopOverflow(DevIdx: LongInt; stop_ovfl: LongInt; stopcount: LongWord): LongInt; stdcall; external LIB_NAME;
+function MH_SetBinning(DevIdx: LongInt; binning: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetOffset(DevIdx: LongInt; offset: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetHistoLen(DevIdx: LongInt; lencode: LongInt; var actuallen: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetMeasControl(DevIdx: LongInt; control: LongInt; startedge: LongInt; stopedge: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetTriggerOutput(DevIdx: LongInt; period: LongInt): LongInt; stdcall; external LIB_NAME;
 
-function  MH_ClearHistMem          (devidx : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_StartMeas             (devidx : LongInt; tacq : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_StopMeas              (devidx : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_CTCStatus             (devidx : LongInt; var ctcstatus : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_ClearHistMem(DevIdx: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_StartMeas(DevIdx: LongInt; tacq: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_StopMeas(DevIdx: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_CTCStatus(DevIdx: LongInt; var ctcstatus: LongInt): LongInt; stdcall; external LIB_NAME;
 
-function  MH_GetHistogram          (devidx : LongInt; var chcount : LongWord; channel : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetAllHistograms      (devidx : LongInt; var chcount : LongWord) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetResolution         (devidx : LongInt; var resolution : Double) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetSyncPeriod         (devidx : LongInt; var period : Double) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetSyncRate           (devidx : LongInt; var syncrate : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetCountRate          (devidx : LongInt; channel : LongInt; var cntrate : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetAllCountRates      (devidx : LongInt; var syncrate : LongInt; var cntrates : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetFlags              (devidx : LongInt; var flags : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetElapsedMeasTime    (devidx : LongInt; var elapsed : Double) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetStartTime          (devidx : LongInt; var timedw2 : LongWord; var timedw1 : LongWord; var timedw0 : LongWord) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_GetHistogram(DevIdx: LongInt; var chcount: LongWord; channel: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetAllHistograms(DevIdx: LongInt; var chcount: LongWord): LongInt; stdcall; external LIB_NAME;
+function MH_GetResolution(DevIdx: LongInt; var Resolution: Double): LongInt; stdcall; external LIB_NAME;
+function MH_GetSyncPeriod(DevIdx: LongInt; var period: Double): LongInt; stdcall; external LIB_NAME;
+function MH_GetSyncRate(DevIdx: LongInt; var syncrate: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetCountRate(DevIdx: LongInt; channel: LongInt; var cntrate: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetAllCountRates(DevIdx: LongInt; var syncrate: LongInt; var cntrates: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetFlags(DevIdx: LongInt; var flags: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetElapsedMeasTime(DevIdx: LongInt; var elapsed: Double): LongInt; stdcall; external LIB_NAME;
+function MH_GetStartTime(DevIdx: LongInt; var timedw2: LongWord; var timedw1: LongWord; var timedw0: LongWord): LongInt; stdcall; external LIB_NAME;
 
-function  MH_GetWarnings           (devidx : LongInt; var warnings : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetWarningsText       (devidx : LongInt; text : pAnsiChar; warnings : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_GetWarnings(DevIdx: LongInt; var warnings: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetWarningsText(DevIdx: LongInt; text: PAnsiChar; warnings: LongInt): LongInt; stdcall; external LIB_NAME;
 
 // for the time tagging modes only
-function  MH_SetMarkerHoldoffTime  (devidx : LongInt; holdofftime : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetMarkerEdges        (devidx : LongInt; me1 : LongInt; me2 : LongInt; me3 : LongInt; me4 : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_SetMarkerEnable       (devidx : LongInt; en1 : LongInt; en2 : LongInt; en3 : LongInt; en4 : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_ReadFiFo              (devidx : LongInt; var buffer : LongWord; var nactual : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function MH_SetMarkerHoldoffTime(DevIdx: LongInt; holdofftime: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetMarkerEdges(DevIdx: LongInt; me1: LongInt; me2: LongInt; me3: LongInt; me4: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetMarkerEnable(DevIdx: LongInt; en1: LongInt; en2: LongInt; en3: LongInt; en4: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_ReadFiFo(DevIdx: LongInt; var buffer: LongWord; var nactual: LongInt): LongInt; stdcall; external LIB_NAME;
 
 //for debugging only
-function  MH_GetDebugInfo          (devidx : LongInt; debuginfo : pAnsiChar) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetNumOfModules       (devidx : LongInt; var nummod : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
-function  MH_GetModuleInfo         (devidx : LongInt; modidx : LongInt; var modelcode : LongInt; var versioncode : LongInt) : LongInt;
-  stdcall; external LIB_NAME;
+function  MH_GetDebugInfo(DevIdx: LongInt; debuginfo: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function  MH_GetNumOfModules(DevIdx: LongInt; var nummod: LongInt): LongInt; stdcall; external LIB_NAME;
+function  MH_GetModuleInfo(DevIdx: LongInt; modidx: LongInt; var modelcode: LongInt; var versioncode: LongInt): LongInt; stdcall; external LIB_NAME;
 
 procedure MH_CloseAllDevices;
 
@@ -281,7 +290,6 @@ const
 
 
 //The following are bitmasks for return values from MH_GetWarnings
-
   WARNING_SYNC_RATE_ZERO            = $0001;
   WARNING_SYNC_RATE_VERY_LOW        = $0002;
   WARNING_SYNC_RATE_TOO_HIGH        = $0004;
@@ -296,6 +304,36 @@ const
 
   WARNING_DIVIDER_TOO_SMALL         = $1000;
   WARNING_COUNTS_DROPPED            = $2000;
+
+//The following is only for use with White Rabbit
+  WR_STATUS_LINK_ON             = $00000001;  // WR link is switched on
+  WR_STATUS_LINK_UP             = $00000002;  // WR link is established
+
+  WR_STATUS_MODE_BITMASK        = $0000000C;  // mask for the mode bits
+  WR_STATUS_MODE_OFF            = $00000000;  // mode is "off"
+  WR_STATUS_MODE_SLAVE          = $00000004;  // mode is "slave"
+  WR_STATUS_MODE_MASTER         = $00000008;  // mode is "master"
+  WR_STATUS_MODE_GMASTER        = $0000000C;  // mode is "grandmaster"
+
+  WR_STATUS_LOCKED_CALIBD       = $00000010;  // locked and calibrated
+
+  WR_STATUS_PTP_BITMASK         = $000000E0;  // mask for the PTP bits
+  WR_STATUS_PTP_LISTENING       = $00000020;
+  WR_STATUS_PTP_UNCLWRSLCK      = $00000040;
+  WR_STATUS_PTP_SLAVE           = $00000060;
+  WR_STATUS_PTP_MSTRWRMLCK      = $00000080;
+  WR_STATUS_PTP_MASTER          = $000000A0;
+
+  WR_STATUS_SERVO_BITMASK       = $00000700;  // mask for the servo bits
+  WR_STATUS_SERVO_UNINITLZD     = $00000100;  //
+  WR_STATUS_SERVO_SYNC_SEC      = $00000200;  //
+  WR_STATUS_SERVO_SYNC_NSEC     = $00000300;  //
+  WR_STATUS_SERVO_SYNC_PHASE    = $00000400;  //
+  WR_STATUS_SERVO_WAIT_OFFST    = $00000500;  //
+  WR_STATUS_SERVO_TRCK_PHASE    = $00000600;  //
+
+  WR_STATUS_MAC_SET             = $00000800;  // user defined mac address is set
+  WR_STATUS_IS_NEW              = $80000000;  // status updated since last check
 
 implementation
 

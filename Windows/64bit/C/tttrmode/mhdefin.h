@@ -3,15 +3,15 @@
     MHLib programming library for MultiHarp 150
     PicoQuant GmbH 
 
-    Ver. 1.0.0.0     Sept. 2018
+    Ver. 2.0.0.0     May 2020
 */
 
 
-#define LIB_VERSION "1.0"	// library version
+#define LIB_VERSION "2.0"	// library version
 
 #define MAXDEVNUM   8       // max number of USB devices
  
-#define MAXINPCHAN  8       // max number of physicl input channels
+#define MAXINPCHAN  16      // max number of physicl input channels
 
 #define BINSTEPSMAX 23      // max number of binning steps, 
                             // get actual number via MH_GetBaseResolution()
@@ -51,11 +51,12 @@
 #define EDGE_FALLING  0
 
 //bitmasks for results from MH_GetFeatures
-#define FEATURE_DLL       0x0001
-#define FEATURE_TTTR      0x0002
-#define FEATURE_MARKERS   0x0004 
-#define FEATURE_LOWRES    0x0008 
-#define FEATURE_TRIGOUT   0x0010
+#define FEATURE_DLL       0x0001  // DLL License available
+#define FEATURE_TTTR      0x0002  // TTTR mode available
+#define FEATURE_MARKERS   0x0004  // Markers available
+#define FEATURE_LOWRES    0x0008  // Long range mode available 
+#define FEATURE_TRIGOUT   0x0010  // Trigger output available
+#define FEATURE_PROG_TD   0x0020  // Programmable deadtime available
 
 //bitmasks for results from MH_GetFlags
 #define FLAG_OVERFLOW     0x0001  // histo mode only
@@ -84,9 +85,13 @@
 #define CHANOFFSMIN    -99999     // ps
 #define CHANOFFSMAX     99999     // ps
 
+//limits for MH_SetSyncDeadTime and MH_SetInputDeadTime
+#define EXTDEADMIN        800     // ps
+#define EXTDEADMAX     160000     // ps
+
 //limits for MH_SetOffset
-#define OFFSETMIN           0     // ns, for MH_SetOffset
-#define OFFSETMAX   100000000     // ns, for MH_SetOffset
+#define OFFSETMIN           0     // ns
+#define OFFSETMAX   100000000     // ns
 
 //limits for MH_StartMeas
 #define ACQTMIN             1     // ms
@@ -121,7 +126,7 @@
 
 //The following is only for use with White Rabbit
 
-#define WR_STATUS_LINK_ON               0x00000001  // mac address is set
+#define WR_STATUS_LINK_ON               0x00000001  // WR link is switched on
 #define WR_STATUS_LINK_UP               0x00000002  // WR link is established
 
 #define WR_STATUS_MODE_BITMASK          0x0000000C  // mask for the mode bits
@@ -147,6 +152,6 @@
 #define WR_STATUS_SERVO_WAIT_OFFST      0x00000500  //
 #define WR_STATUS_SERVO_TRCK_PHASE      0x00000600  //
 
-#define WR_STATUS_MAC_SET               0x00000002  // mac address is set
+#define WR_STATUS_MAC_SET               0x00000800  // user defined mac address is set
 #define WR_STATUS_IS_NEW                0x80000000  // status updated since last check
 

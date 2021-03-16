@@ -1,16 +1,16 @@
 
-% Demo for access to MultiHarp 150 Hardware via MHLIB v 1.0.
+% Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v 2.0.
 % The program performs a TTTR measurement based on hardcoded settings.
 % The resulting data stream is stored in a binary output file.
 %
-% Axel Hagen, PicoQuant, June 2018
+% Axel Hagen, PicoQuant, May 2020
 
 
 % Constants from mhdefin.h
 
-REQLIBVER   =   '1.0';    % this is the version this program expects
+REQLIBVER   =   '2.0';    % this is the version this program expects
 MAXDEVNUM   =       8;
-TTREADMAX   = 1048576;     % 1M event records 
+TTREADMAX   = 1048576;    % 1M event records 
 MODE_HIST   =       0;
 MODE_T2	   =        2;
 MODE_T3	   =        3;
@@ -19,10 +19,10 @@ FLAG_FIFOFULL = hex2dec('0002');
 
 TRGLVLMIN	  =      -1200;	    % mV
 TRGLVLMAX	  =       1200;	    % mV
-OFFSETMIN	  =          0;		% ns
+OFFSETMIN	  =          0;     % ns
 OFFSETMAX	  =  100000000;	    % ns
 
-ACQTMIN		  =          1;		% ms
+ACQTMIN		  =          1;	    % ms
 ACQTMAX		  =  360000000;	    % ms  (100*60*60*1000ms = 100h)
 
 % Errorcodes from errorcodes.h
@@ -33,15 +33,15 @@ MH_ERROR_DEVICE_OPEN_FAIL		 = -1;
  
 Mode          = MODE_T3; %  you can change this
 SyncTrgEdge   =       0; %  you can change this
-SyncTrgLevel  =     -50; %  you can change this
+SyncTrgLevel  =    -100; %  you can change this
 InputTrgEdge  =       0; %  you can change this
-InputTrgLevel =     -50; %  you can change this
-SyncDiv       =       8; %  you can change this (observe mode!)
+InputTrgLevel =    -100; %  you can change this
+SyncDiv       =       1; %  you can change this (observe mode!)
 Binning       =       0; %  you can change this
 Tacq          =   10000; %  you can change this       
     
 
-fprintf('\nMultiHarp 150 MHLib.DLL Demo Application             PicoQuant 2018\n');
+fprintf('\nMultiHarp 150 MHLib.DLL Demo Application             PicoQuant 2020\n');
 
 if (~libisloaded('MHlib'))    
     %Attention: The header file name given below is case sensitive and must
@@ -51,10 +51,30 @@ if (~libisloaded('MHlib'))
     %be able to access the library!
     %The alias is used to provide a fixed spelling for any further access via
     %calllib() etc, which is also case sensitive.
+    
+    %To load the right dll for OS and bitness we use the mexext command.
+    %Therefor the next four lines, demonstrating the old manual way, have
+    %been commented.
+    
     %loadlibrary('Mhlib.dll',   'mhlib.h', 'alias', 'MHlib'); % Windows 32 bit
     %loadlibrary('MHLib64.dll', 'mhlib.h', 'alias', 'MHlib'); % Windows 64 bit 
     %loadlibrary('/usr/local/lib/mh150/mhlib.so', 'mhlib.h', 'alias', 'MHlib'); % Linux 32 bit       
-    loadlibrary('/usr/local/lib64/mh150/mhlib.so', 'mhlib.h', 'alias', 'MHlib'); % Linux 64 bit      
+    %loadlibrary('/usr/local/lib64/mh150/mhlib.so', 'mhlib.h', 'alias', 'MHlib'); % Linux 64 bit
+    
+    OS = mexext;
+    if strcmp('mexw32', OS)
+        DLL = 'MHLib.dll';                        % Windows 32 bit
+    elseif strcmp('mexw64', OS)
+        DLL = 'MHLib64.dll';                      % Windows 64 bit
+    elseif strcmp('mexa32', OS)
+        DLL = '/usr/local/lib/mh150/mhlib.so';    % Linux 32 bit
+    elseif strcmp('mexa64', OS)
+        DLL = '/usr/local/lib64/mh150/mhlib.so';  % Linux 64 bit
+    else
+        fprintf('\nNo supported OS\n');
+        return;
+    end
+    loadlibrary(DLL, 'mhlib.h', 'alias', 'MHlib');
 else
     fprintf('Note: MHlib was already loaded\n');
 end
@@ -146,7 +166,7 @@ if(ret<0)
 end 
 
 %this is only for information
-Model      = blanks(16); %enough length!
+Model      = blanks(24); %enough length!
 Partno     = blanks(8); %enough length!
 Version    = blanks(8); %enough length!
 ModelPtr   = libpointer('cstring', Model);

@@ -1,8 +1,9 @@
 {
-  MultiHarp 150  MHLIB v1.0  Usage Demo with Delphi or Lazarus
+  MultiHarp 150  MHLIB v2.0  Usage Demo with Delphi or Lazarus
   
   Tested with
-   - Delphi 10.1 on Windows 10
+   - Delphi 10.2 on Windows 10
+   - Lazarus 2.0.8 / fpc 3.0.4 on Windows 10
    - Lazarus 1.8.4 / fpc 3.0.4 on Windows 8
    - Lazarus 1.4.4 / fpc 2.6.4 on Linux
 
@@ -10,7 +11,9 @@
   The program performs a histogram measurement based on hardcoded settings.
   The resulting histogram (65536 time bins) is stored in an ASCII output file.
 
-  Axel Hagen, Michael Wahl, PicoQuant GmbH, October 2018 
+  Axel Hagen, PicoQuant GmbH, August 2018
+  Marcus Sackrow, PicoQuant GmbH, July 2019
+  Michael Wahl, PicoQuant GmbH, May 2020
 
   Note: This is a console application (i.e. to be run from the command line)
 
@@ -75,7 +78,7 @@ var
     if iRetCode <> MH_ERROR_NONE
     then begin
       MH_GetErrorString (pcErrText, iRetCode);
-      writeln ('Error ', iRetCode:3, ' = "', Trim (strErrText), '"');
+      writeln ('Error ', iRetCode:3, ' = "', Trim (string(strErrText)), '"');
     end;
     writeln;
     {$I-}
@@ -89,7 +92,7 @@ var
 
 begin
   writeln;
-  writeln ('MultiHarp 150 MHLib   Usage Demo                    PicoQuant GmbH, 2018');
+  writeln ('MultiHarp 150 MHLib   Usage Demo                    PicoQuant GmbH, 2020');
   writeln ('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
   iRetCode := MH_GetLibraryVersion (pcLibVers);
   if iRetCode <> MH_ERROR_NONE
@@ -98,7 +101,7 @@ begin
     ex (iRetCode);
   end;
   writeln ('MHLIB version is ' + strLibVers);
-  if trim (strLibVers) <> trim (AnsiString (LIB_VERSION))
+  if trim (string(strLibVers)) <> trim (AnsiString (LIB_VERSION))
   then
     writeln ('Warning: The application was built for version ' + LIB_VERSION);
 
@@ -146,7 +149,7 @@ begin
         writeln ('   ', i, '       no device')
       else begin
         MH_GetErrorString (pcErrText, iRetCode);
-        writeln ('   ', i, '       ', Trim (strErrText));
+        writeln ('   ', i, '       ', Trim (string(strErrText)));
       end;
     end;
   end;
@@ -328,7 +331,7 @@ begin
     end;
 
     writeln('press RETURN to start measurement');
-    readln (cCmd);
+    readln;
 
     writeln;
 

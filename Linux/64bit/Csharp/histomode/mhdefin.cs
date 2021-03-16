@@ -2,7 +2,7 @@
     MHLib programming library for MultiHarp 150
     PicoQuant GmbH 
 
-    Ver. 1.0.0.0     Sept. 2018
+    Ver. 2.0.0.0     May 2020
 */
 
 using System;
@@ -15,11 +15,11 @@ public static class Constants
 {
   // the following constants are taken from mhdefin.h
   
-  public const string LIB_VERSION = "1.0";  // library version
+  public const string LIB_VERSION = "2.0";  // library version
 
   public const int MAXDEVNUM = 8;  // max num of USB devices
   
-  public const int MAXINPCHAN = 8;  // max num of physicl input channels
+  public const int MAXINPCHAN = 16;  // max num of physicl input channels
   
   public const int BINSTEPSMAX = 23;  // max num of binning steps, get actual number via MH_GetBaseResolution()
   
@@ -58,11 +58,12 @@ public static class Constants
   public const int EDGE_FALLING = 0;
 
   //bitmasks for results from MH_GetFeatures
-  public const int FEATURE_DLL = 0x0001;
-  public const int FEATURE_TTTR = 0x0002;
-  public const int FEATURE_MARKERS = 0x0004;
-  public const int FEATURE_LOWRES = 0x0008;
-  public const int FEATURE_TRIGOUT = 0x0010;
+  public const int FEATURE_DLL = 0x0001;  // DLL License available
+  public const int FEATURE_TTTR = 0x0002;  // TTTR mode available
+  public const int FEATURE_MARKERS = 0x0004;  // Markers available
+  public const int FEATURE_LOWRES = 0x0008;  // Long range mode available
+  public const int FEATURE_TRIGOUT = 0x0010;  // Trigger output available
+  public const int FEATURE_PROG_TC = 0x0020;  // Programmable deadtime available
 
   //bitmasks for results from MH_GetFlag
   public const int FLAG_OVERFLOW = 0x0001;  // histo mode only
@@ -90,10 +91,14 @@ public static class Constants
   //limits for MH_SetSyncChannelOffset and MH_SetInputChannelOffset
   public const int CHANOFFSMIN = -99999;  // ps
   public const int CHANOFFSMAX = 99999;  // ps
-  
+
+  //limits for MH_SetSyncDeadTime and MH_SetInputDeadTime
+  public const int EXTDEADMIN = 800;  // ps
+  public const int EXTDEADMAX = 160000;  // ps
+
   //limits for MH_SetOffset
-  public const int OFFSETMIN = 0;  // ns, for MH_SetOffset
-  public const int OFFSETMAX = 100000000;  // ns, for MH_SetOffset 
+  public const int OFFSETMIN = 0;  // ns
+  public const int OFFSETMAX = 100000000;  // ns
 
   //limits for MH_StartMeas
   public const int ACQTMIN = 1;  // ms
@@ -115,7 +120,7 @@ public static class Constants
   // The following are bitmasks for return values from GetWarnings()
 
   public const int WARNING_SYNC_RATE_ZERO = 0x0001;
-  public const int WARNING_SYNC_RATE_TOO_LOW = 0x0002;
+  public const int WARNING_SYNC_RATE_VERY_LOW = 0x0002;
   public const int WARNING_SYNC_RATE_TOO_HIGH = 0x0004;
   public const int WARNING_INPT_RATE_ZERO = 0x0010;
   public const int WARNING_INPT_RATE_TOO_HIGH = 0x0040;
@@ -129,7 +134,7 @@ public static class Constants
 
   //The following is only for use with White Rabbit
 
-  public const int WR_STATUS_LINK_ON = 0x00000001;  // mac address is set
+  public const int WR_STATUS_LINK_ON = 0x00000001;  // WR link is switched on
   public const int WR_STATUS_LINK_UP = 0x00000002;  // WR link is established
 
   public const int WR_STATUS_MODE_BITMASK = 0x0000000C;  // mask for the mode bits
@@ -155,6 +160,6 @@ public static class Constants
   public const int WR_STATUS_SERVO_WAIT_OFFST = 0x00000500;  //
   public const int WR_STATUS_SERVO_TRCK_PHASE = 0x00000600;  //
 
-  public const int WR_STATUS_MAC_SET = 0x00000002;  // mac address is set
+  public const int WR_STATUS_MAC_SET = 0x00000002;  // user defined mac address is set
   public const uint WR_STATUS_IS_NEW = 0x80000000;  // status updated since last check
 }
