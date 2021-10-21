@@ -1,19 +1,30 @@
 # MHLib Programming Library for MultiHarp 150
 
-Version 2.0.0.0 
-PicoQuant GmbH - May 2020
+MHLib Programming Library for MultiHarp 150/160 
+Version 3.0.0.0
+PicoQuant GmbH - March 2021
 
 
 
 ## Introduction
 
-The MultiHarp 150 is a TCSPC system with USB 3.0 interface.
+The MultiHarp 150/160 is a TCSPC system with USB 3.0 interface. 
 The system requires a 686 class PC with suitable USB host controller,
-4 GB of memory, two or more CPU cores and at least 2 GHz CPU clock.
-The MultiHarp software is supported on Windows 8 and Windows 10
-including the x64 versions.
-The programming library is a DLL with demos for various programming
+4 GB of memory, two or more CPU cores and at least 2 GHz CPU clock. 
+The MultiHarp software is supported on Windows 8.1 and Windows 10 
+including the x64 versions. 
+The programming library is a DLL with demos for various programming 
 languages. Please refer to the manual (PDF) for instructions.
+
+
+## What's new in version 3.0
+
+- Support of the new hardware model MultiHarp 160 
+- Support of the external FPGA interface (EFI) of the MultiHarp 160 
+- Support of the programmable input hysteresis of the MultiHarp 160 
+- Fixes a critical bug where in previous versions the call of some 
+  White Rabbit functions might damage the content of the device EEPROMs
+- Fixes a bug where the return time of MH_ReadFifo was very long
 
 ## What's new in version 2.0
 
