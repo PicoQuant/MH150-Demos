@@ -1,15 +1,14 @@
-MultiHarp 150
-Version 2.0.0.0
-PicoQuant GmbH - May 2020
+MultiHarp Software Version 3.0.0.0
+PicoQuant GmbH - May 2021
 
 
 Acknowledgements
 
-The MultiHarp 150 hardware in its current version as of April 2020 
+The MultiHarp hardware in its current version as of May 2021 
 uses the White Rabbit PTP core v. 4.0
 (https://www.ohwr.org/projects/wr-cores/wiki/wrpc-release-v40) licensed 
 under the CERN Open Hardware Licence v1.1 and its embedded WRPC software 
-(https://www.ohwr.org/projects/wrpc-sw/wiki/wiki) licensed under GPL 
+(https://ohwr.org/projects/wrpc-sw/wikis/home) licensed under GPL 
 Version 2, June 1991. The WRPC software was minimally modified and in 
 order to meet the licensing terms the modified WRPC source code is 
 provided as a tar.gz file. The original GPL license is included there.
