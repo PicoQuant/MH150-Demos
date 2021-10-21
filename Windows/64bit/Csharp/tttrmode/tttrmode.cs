@@ -1,11 +1,11 @@
 ﻿/************************************************************************
 
-  C# demo access to MultiHarp 150 Hardware via MHLIB v 2.0.
+  C# demo access to MultiHarp 150/160 hardware via MHLIB v 3.0.
   The program performs a measurement based on hardcoded settings.
 
   The resulting event data is stored in a binary output file.
 
-  PicoQuant GmbH, May 2020
+  PicoQuant GmbH, March 2021
 
   Note: This is a console application (i.e. run in Windows cmd box)
 
@@ -73,7 +73,7 @@ namespace tttrmode
       BinaryWriter bw = null;
 
 
-      Console.WriteLine("MultiHarp 150     MHLib Demo Application               PicoQuant GmbH, 2020");
+      Console.WriteLine("MultiHarp 150/160     MHLib Demo Application           PicoQuant GmbH, 2021");
       Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
       retcode = mhlib.MH_GetLibraryVersion(LibVer);

@@ -1,12 +1,12 @@
 /************************************************************************
 
-  Demo access to MultiHarp 150 Hardware via MHLIB v 2.0
+  Demo access to MultiHarp 150/160 hardware via MHLIB v 3.0
   The program performs a measurement based on hardcoded settings.
   The resulting histogram is stored in an ASCII output file.
 
-  Michael Wahl, PicoQuant GmbH, May 2020
+  Michael Wahl, PicoQuant GmbH, March 2021
 
-  Note: This is a console application (i.e. run in Windows cmd box)
+  Note: This is a console application
 
   Note: At the API level channel numbers are indexed 0..N-1 
     where N is the number of channels the device has.
@@ -17,7 +17,7 @@
   - MinGW-W64 4.3.5 (Windows 64 bit)
   - MS Visual C++ 6.0 (Windows 32 bit)
   - MS Visual C++ 2015 and 2019 (Windows 32 and 64 bit)
-  - gcc 4.8.3 and 7.5.0 (Linux 64 bit)
+  - gcc 7.5.0 and 9.3.0 (Linux 64 bit)
 
 ************************************************************************/
 
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
   memset(Errorstring, 0x00, sizeof(Errorstring));
   memset(warningstext, 0x00, sizeof(warningstext));
 
-  printf("\nMultiHarp 150 MHLib Demo Application               PicoQuant GmbH, 2020");
+  printf("\nMultiHarp MHLib Demo Application                   PicoQuant GmbH, 2021");
   printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   MH_GetLibraryVersion(LIB_Version);
   printf("\nLibrary version is %s", LIB_Version);
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
     printf("\nFound Model %s Part no %s Version %s",HW_Model, HW_Partno, HW_Version);
   }
 
-  if (strstr(HW_Model, "MultiHarp 150") != NULL)
+  if (strstr(HW_Model, "MultiHarp") != NULL)
   {
     fprintf(fpout, "Hardware model %s \n", HW_Model);
   }

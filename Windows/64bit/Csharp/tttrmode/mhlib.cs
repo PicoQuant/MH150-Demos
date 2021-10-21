@@ -1,8 +1,8 @@
 ﻿/* 
-    MHLib programming library for MultiHarp 150
+    MHLib programming library for MultiHarp 150/160
     PicoQuant GmbH 
 
-    Ver. 2.0.0.0     May 2020
+    Ver. 3.0.0.0     March 2021
 */
 
 using System;
@@ -65,6 +65,8 @@ public static class mhlib
   extern public static int MH_SetInputChannelOffset(int devidx, int channel, int value);
   [DllImport(MHLib)]
   extern public static int MH_SetInputDeadTime(int devidx, int channel, int on, int deadtime);  //new in v1.1
+  [DllImport(MHLib)]
+  extern public static int MH_SetInputHysteresis(int devidx, int hystcode);   //new since v3.0
   [DllImport(MHLib)]
   extern public static int MH_SetInputChannelEnable(int devidx, int channel, int enable);
 
@@ -159,5 +161,18 @@ public static class mhlib
   extern public static int MH_WRabbitGetStatus(int devidx, ref uint wrstatus);
   [DllImport(MHLib)]
   extern public static int MH_WRabbitGetTermOutput(int devidx, StringBuilder buffer, ref int nchar);
+
+
+  //for MultiHarp 160 with external FPGA only
+  [DllImport(MHLib)]
+  extern public static int MH_ExtFPGAInitLink(int devidx, int linknumber, int on);
+  [DllImport(MHLib)]
+  extern public static int MH_ExtFPGAGetLinkStatus(int devidx, int linknumber, ref uint status);
+  [DllImport(MHLib)]
+  extern public static int MH_ExtFPGASetMode(int devidx, int mode, int loopback);
+  [DllImport(MHLib)]
+  extern public static int MH_ExtFPGAResetStreamFifos(int devidx);
+  [DllImport(MHLib)]
+  extern public static int MH_ExtFPGAUserCommand(int devidx, int write, uint addr, ref uint data);
 
 }

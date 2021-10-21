@@ -1,8 +1,8 @@
 /* 
-    MHLib programming library for MultiHarp 150
+    MHLib programming library for MultiHarp 150/160
     PicoQuant GmbH 
 
-    Ver. 2.0.0.0     May 2020
+    Ver. 3.0.0.0     March 2021
 */
 
 #ifndef _WIN32
@@ -32,6 +32,7 @@ extern int _stdcall MH_SetSyncDeadTime(int devidx, int on, int deadtime);  //new
 extern int _stdcall MH_SetInputEdgeTrg(int devidx, int channel, int level, int edge);
 extern int _stdcall MH_SetInputChannelOffset(int devidx, int channel, int value);
 extern int _stdcall MH_SetInputDeadTime(int devidx, int channel, int on, int deadtime);  //new since v1.1
+extern int _stdcall MH_SetInputHysteresis(int devidx, int hystcode);   //new since v3.0
 extern int _stdcall MH_SetInputChannelEnable(int devidx, int channel, int enable);
 
 extern int _stdcall MH_SetStopOverflow(int devidx, int stop_ovfl, unsigned int stopcount);	
@@ -85,3 +86,9 @@ extern int _stdcall MH_WRabbitGetTime(int devidx, unsigned int* timehidw, unsign
 extern int _stdcall MH_WRabbitGetStatus(int devidx, int* wrstatus);
 extern int _stdcall MH_WRabbitGetTermOutput(int devidx, char* buffer, int* nchar);
 
+//for MultiHarp 160 with external FPGA only
+extern int _stdcall MH_ExtFPGAInitLink(int devidx, int linknumber, int on);
+extern int _stdcall MH_ExtFPGAGetLinkStatus(int devidx, int linknumber, unsigned int* status);
+extern int _stdcall MH_ExtFPGASetMode(int devidx, int mode, int loopback);
+extern int _stdcall MH_ExtFPGAResetStreamFifos(int devidx);
+extern int _stdcall MH_ExtFPGAUserCommand(int devidx, int write, unsigned int addr, unsigned int* data);

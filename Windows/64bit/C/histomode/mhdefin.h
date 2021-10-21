@@ -1,19 +1,19 @@
 
 /* 
-    MHLib programming library for MultiHarp 150
+    MHLib programming library for MultiHarp 150/160
     PicoQuant GmbH 
 
-    Ver. 2.0.0.0     May 2020
+    Ver. 3.0.0.0     March 2021
 */
 
 
-#define LIB_VERSION "2.0"	// library version
+#define LIB_VERSION "3.0"	// library version
 
 #define MAXDEVNUM   8       // max number of USB devices
  
-#define MAXINPCHAN  16      // max number of physicl input channels
+#define MAXINPCHAN  64      // max number of physicl input channels
 
-#define BINSTEPSMAX 23      // max number of binning steps, 
+#define BINSTEPSMAX 24      // max number of binning steps, 
                             // get actual number via MH_GetBaseResolution()
 
 #define MAXHISTLEN  65536   // max number of histogram bins
@@ -57,6 +57,8 @@
 #define FEATURE_LOWRES    0x0008  // Long range mode available 
 #define FEATURE_TRIGOUT   0x0010  // Trigger output available
 #define FEATURE_PROG_TD   0x0020  // Programmable deadtime available
+#define FEATURE_EXT_FPGA  0x0040  // Interface for External FPGA available
+#define FEATURE_PROG_HYST 0x0080  // Programmable input hysteresis available
 
 //bitmasks for results from MH_GetFlags
 #define FLAG_OVERFLOW     0x0001  // histo mode only
@@ -109,6 +111,10 @@
 #define HOLDOFFMIN          0     // ns
 #define HOLDOFFMAX      25500     // ns
 
+//limits for MH_SetInputHysteresis
+#define HYSTCODEMIN         0     // approx. 3mV
+#define HYSTCODEMAX         1     // approx. 35mV
+
 
 //The following are bitmasks for results from GetWarnings()
 
@@ -155,3 +161,16 @@
 #define WR_STATUS_MAC_SET               0x00000800  // user defined mac address is set
 #define WR_STATUS_IS_NEW                0x80000000  // status updated since last check
 
+
+
+//The following is only for use with an external FPGA connected to a MultiHarp 160
+
+#define EXTFPGA_MODE_OFF                0
+#define EXTFPGA_MODE_T2RAW              1
+#define EXTFPGA_MODE_T2                 2
+#define EXTFPGA_MODE_T3                 3
+
+#define EXTFPGA_LOOPBACK_OFF            0
+#define EXTFPGA_LOOPBACK_CUSTOM         1
+#define EXTFPGA_LOOPBACK_T2             2
+#define EXTFPGA_LOOPBACK_T3             3

@@ -1,9 +1,9 @@
-# Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v2.0.
+# Demo for access to MultiHarp 150/160 hardware via MHLIB v3.0.
 # The program performs a measurement based on hard coded settings.
 # The resulting histogram (65536 channels) is stored in an ASCII output file.
 #
 # Keno Goertz, PicoQuant GmbH, July 2019
-# Michael Wahl, PicoQuant GmbH, May 2020
+# Michael Wahl, PicoQuant GmbH, May 2020, March 2021
 
 import time
 import ctypes as ct
@@ -19,11 +19,11 @@ if sys.version_info[0] < 3:
     input = raw_input
 
 # From mhdefin.h
-LIB_VERSION = "2.0"
+LIB_VERSION = "3.0"
 MAXDEVNUM = 8
 MODE_HIST = 0
 MAXLENCODE = 6
-MAXINPCHAN = 16
+MAXINPCHAN = 64
 MAXHISTLEN = 65536
 FLAG_OVERFLOW = 0x0001
 

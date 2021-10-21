@@ -1,12 +1,12 @@
 /************************************************************************
 
-Demo access to MultiHarp 150 Hardware via MHLIB v.2.0
+Demo access to MultiHarp 150/160 hardware via MHLIB v.3.0
 The program performs a measurement based on hardcoded settings.
 The resulting event data is stored in a binary output file.
 
-Michael Wahl, PicoQuant GmbH, May 2020
+Michael Wahl, PicoQuant GmbH, March 2021
 
-Note: This is a console application (i.e. run in Windows cmd box)
+Note: This is a console application
 
 Note: At the API level the input channel numbers are indexed 0..N-1
 where N is the number of input channels the device has.
@@ -21,7 +21,7 @@ Tested with the following compilers:
   - MinGW-W64 4.3.5 (Windows 64 bit)
   - MS Visual C++ 6.0 (Windows 32 bit)
   - MS Visual C++ 2015 and 2019 (Windows 32 and 64 bit)
-  - gcc 4.8.3 and 7.5.0 (64 bit)
+  - gcc 7.5.0 and 9.3.0 (Linux 64 bit)
 
 ************************************************************************/
 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   unsigned int Progress;
 
 
-  printf("\nMultiHarp 150 MHLib.DLL Demo Application              PicoQuant GmbH, 2020");
+  printf("\nMultiHarp MHLib Demo Application                      PicoQuant GmbH, 2021");
   printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   MH_GetLibraryVersion(LIB_Version);
   printf("\nLibrary version is %s\n", LIB_Version);

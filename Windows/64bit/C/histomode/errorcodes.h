@@ -1,8 +1,8 @@
 /* 
-    MHLib programming library for MultiHarp 150
+    MHLib programming library for MultiHarp 150/160
     PicoQuant GmbH 
 
-    Ver. 2.0.0.0     May 2020
+    Ver. 3.0.0.0     March 2021
 */
 
 #define MH_ERROR_NONE                                      0 

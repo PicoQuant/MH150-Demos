@@ -1,18 +1,18 @@
 
-% Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v 2.0.
+% Demo for access to MultiHarp 150/160 hardware via MHLIB v 3.0.
 % The program performs a measurement based on hard coded settings.
 % The resulting histogram (65536 bins) is stored in an ASCII output file.
 %
 % Axel Hagen, PicoQuant, May 2020
-
+% Michael Wahl, PicoQuant, March 2021
 
 % Constants from mhdefin.h
 
-REQLIBVER   =     '2.0';    % this is the version this program expects
+REQLIBVER   =     '3.0';    % this is the version this program expects
 MAXDEVNUM   =         8;
 MAXHISTBINS =     65536;	 % number of histogram channels
 MAXLENCODE  =         6;	 % max histogram length is 65536	
-MAXBINSTEPS =        23;
+MAXBINSTEPS =        24;
 MODE_HIST   =         0;
 MODE_T2	    =         2;
 MODE_T3	    =         3;
@@ -41,7 +41,7 @@ SyncDiv       =    1;     %  you can change this
 Binning       =    0;     %  you can change this
 Tacq          = 1000;     %  you can change this      
     
-fprintf('\nMultiHarp 150 MHLib Demo Application             PicoQuant 2020\n');
+fprintf('\nMultiHarp 150/160 MHLib Demo Application             PicoQuant 2021\n');
 
 if (~libisloaded('MHlib'))    
     %Attention: The header file name given below is case sensitive and must
@@ -53,14 +53,6 @@ if (~libisloaded('MHlib'))
     %calllib() etc, which is also case sensitive.
     
     %To load the right dll for OS and bitness we use the mexext command.
-    %Therefor the next four lines, demonstrating the old manual way, have
-    %been commented.
-    
-    %loadlibrary('Mhlib.dll',   'mhlib.h', 'alias', 'MHlib'); % Windows 32 bit
-    %loadlibrary('MHLib64.dll', 'mhlib.h', 'alias', 'MHlib'); % Windows 64 bit 
-    %loadlibrary('/usr/local/lib/mh150/mhlib.so', 'mhlib.h', 'alias', 'MHlib'); % Linux 32 bit       
-    %loadlibrary('/usr/local/lib64/mh150/mhlib.so', 'mhlib.h', 'alias', 'MHlib'); % Linux 64 bit
-    
     OS = mexext;
     if strcmp('mexw32', OS)
         DLL = 'MHLib.dll';                        % Windows 32 bit

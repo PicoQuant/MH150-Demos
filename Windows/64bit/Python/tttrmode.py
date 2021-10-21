@@ -1,9 +1,9 @@
-# Demo for access to MultiHarp 150 Hardware via MHLIB.DLL v2.0.
+# Demo for access to MultiHarp 150/160 hardware via MHLIB v3.0.
 # The program performs a measurement based on hard coded settings.
 # The resulting data is stored in a binary output file.
 #
 # Keno Goertz, PicoQuant GmbH, July 2019
-# Michael Wahl, PicoQuant GmbH, May 2020
+# Michael Wahl, PicoQuant GmbH, May 2020, March 2021
 
 import time
 import ctypes as ct
@@ -19,12 +19,12 @@ if sys.version_info[0] < 3:
     raw_input("press RETURN to continue"); print
 
 # From mhdefin.h
-LIB_VERSION = "2.0"
+LIB_VERSION = "3.0"
 MAXDEVNUM = 8
 MODE_T2 = 2
 MODE_T3 = 3
 MAXLENCODE = 6
-MAXINPCHAN = 16
+MAXINPCHAN = 64
 TTREADMAX = 1048576
 FLAG_OVERFLOW = 0x0001
 FLAG_FIFOFULL = 0x0002
@@ -92,7 +92,8 @@ if libVersion.value.decode("utf-8") != LIB_VERSION:
 
 outputfile = open("tttrmode.out", "wb+")
 
-print("\nMode          : %d" % mode)
+print("\n");
+print("Mode            : %d" % mode)
 print("Binning         : %d" % binning)
 print("Offset          : %d" % offset)
 print("AcquisitionTime : %d" % tacq)

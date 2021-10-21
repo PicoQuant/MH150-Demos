@@ -1,19 +1,19 @@
 {
-  MultiHarp 150  MHLIB v2.0  Usage Demo with Delphi or Lazarus
+  MultiHarp 150/160  MHLIB v3.0  Usage Demo with Delphi or Lazarus
   
   Tested with
    - Delphi 10.2 on Windows 10
-   - Lazarus 2.0.8 / fpc 3.0.4 on Windows 10
+   - Lazarus 2.0.12 / fpc 3.2.0 on Windows 10
    - Lazarus 1.8.4 / fpc 3.0.4 on Windows 8
-   - Lazarus 1.4.4 / fpc 2.6.4 on Linux
+   - Lazarus 2.0.8 / fpc 3.0.4 on Linux
 
-  Demo access to MultiHarp 150 Hardware via MHLIB.
+  Demo access to MultiHarp 150/160 Hardware via MHLIB.
   The program performs a histogram measurement based on hardcoded settings.
   The resulting histogram (65536 time bins) is stored in an ASCII output file.
 
   Axel Hagen, PicoQuant GmbH, August 2018
   Marcus Sackrow, PicoQuant GmbH, July 2019
-  Michael Wahl, PicoQuant GmbH, May 2020
+  Michael Wahl, PicoQuant GmbH, May 2020, March 2021
 
   Note: This is a console application (i.e. to be run from the command line)
 
@@ -92,7 +92,7 @@ var
 
 begin
   writeln;
-  writeln ('MultiHarp 150 MHLib   Usage Demo                    PicoQuant GmbH, 2020');
+  writeln ('MultiHarp MHLib   Usage Demo                        PicoQuant GmbH, 2021');
   writeln ('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
   iRetCode := MH_GetLibraryVersion (pcLibVers);
   if iRetCode <> MH_ERROR_NONE

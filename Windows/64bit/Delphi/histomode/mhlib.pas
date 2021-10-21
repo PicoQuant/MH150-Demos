@@ -2,13 +2,13 @@ Unit MHLib;
 {                                                               }
 { Functions exported by the MultiHarp programming library MHLib }
 {                                                               }
-{ Ver. 2.0      May 2020                                        }
+{ Ver. 3.0    March 2021                                        }
 {                                                               }
 
 interface
 
 const
-  LIB_VERSION    =      '2.0';
+  LIB_VERSION    =      '3.0';
 {$UNDEF PLATFORM_OK}
 {$IFDEF WIN32}
   LIB_NAME       =      'mhlib.dll';  // Windows 32 bit
@@ -28,9 +28,9 @@ const
 
   MAXDEVNUM      =          8;   // max num of USB devices
 
-  MHMAXINPCHAN   =         16;   // max num of physicl input channels
+  MHMAXINPCHAN   =         64;   // max num of input channels
 
-  MAXBINSTEPS    =         23;   // get actual number via HH_GetBaseResolution() !
+  MAXBINSTEPS    =         24;   // get actual number via HH_GetBaseResolution() !
 
   MAXHISTLEN     =      65536;   // max number of histogram bins
 
@@ -72,6 +72,8 @@ const
   FEATURE_LOWRES    = $0008; // Long range mode available
   FEATURE_TRIGOUT   = $0010; // Trigger output available
   FEATURE_PROG_TD   = $0020; // Programmable deadtime available
+  FEATURE_EXT_FPGA  = $0040; // Interface for External FPGA available
+  FEATURE_PROG_HYST = $0080; // Programmable input hysteresis available
 
   //bitmasks for results from MH_GetFlags
   FLAG_OVERFLOW     =      $0001;   // histo mode only
@@ -124,6 +126,10 @@ const
   HOLDOFFMIN =            0;  // ns
   HOLDOFFMAX =        25500;  // ns
 
+  //limits for MH_SetInputHysteresis
+  HYSTCODEMIN =           0;  // approx. 3mV
+  HYSTCODEMAX =           1;  // approx. 35mV
+
 var
   pcLibVers      : pAnsiChar;
   strLibVers     : array [0.. 7] of AnsiChar;
@@ -168,6 +174,7 @@ function MH_SetSyncDeadTime(Devidx: LongInt; IsOn: LongInt; DeadTime: LongInt): 
 function MH_SetInputEdgeTrg(DevIdx: LongInt; channel: LongInt; level: LongInt; edge: LongInt): LongInt; stdcall; external LIB_NAME;
 function MH_SetInputChannelOffset(DevIdx: LongInt; channel: LongInt; value: LongInt): LongInt; stdcall; external LIB_NAME;
 function MH_SetInputDeadTime(DevIdx: LongInt; Channel: LongInt; IsOn: LongInt; DeadTime: LongInt): LongInt; stdcall; external LIB_NAME; //new in v1.1
+function MH_SetInputHysteresis(DevIdx: LongInt; HystCode: LongInt): LongInt; stdcall; external LIB_NAME;   //new since v3.0
 function MH_SetInputChannelEnable(DevIdx: LongInt; channel: LongInt; enable: LongInt): LongInt; stdcall; external LIB_NAME;
 
 function MH_SetStopOverflow(DevIdx: LongInt; stop_ovfl: LongInt; stopcount: LongWord): LongInt; stdcall; external LIB_NAME;
@@ -203,10 +210,32 @@ function MH_SetMarkerEnable(DevIdx: LongInt; en1: LongInt; en2: LongInt; en3: Lo
 function MH_ReadFiFo(DevIdx: LongInt; var buffer: LongWord; var nactual: LongInt): LongInt; stdcall; external LIB_NAME;
 
 //for debugging only
-function  MH_GetDebugInfo(DevIdx: LongInt; debuginfo: PAnsiChar): LongInt; stdcall; external LIB_NAME;
-function  MH_GetNumOfModules(DevIdx: LongInt; var nummod: LongInt): LongInt; stdcall; external LIB_NAME;
-function  MH_GetModuleInfo(DevIdx: LongInt; modidx: LongInt; var modelcode: LongInt; var versioncode: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetDebugInfo(DevIdx: LongInt; debuginfo: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_GetNumOfModules(DevIdx: LongInt; var nummod: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetModuleInfo(DevIdx: LongInt; modidx: LongInt; var modelcode: LongInt; var versioncode: LongInt): LongInt; stdcall; external LIB_NAME;
 
+//for White Rabbit only
+function MH_WRabbitGetMAC(DevIdx: LongInt; mac_addr: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitSetMAC(DevIdx: LongInt; mac_addr: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitGetInitScript(DevIdx: LongInt; initscript: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitSetInitScript(DevIdx: LongInt; initscript: PAnsiChar): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitGetSFPData(DevIdx: LongInt; sfpnames: PAnsiChar; var dTxs: LongInt; var dRxs: LongInt; var alphas: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitSetSFPData(DevIdx: LongInt; sfpnames: PAnsiChar; var dTxs: LongInt; var dRxs: LongInt; var alphas: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitInitLink(DevIdx: LongInt; link_on: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitSetMode(DevIdx: LongInt; bootfromscript: LongInt; reinit_with_mode: LongInt; mode: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitSetTime(DevIdx: LongInt; timehidw: LongWord; timelodw: LongWord): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitGetTime(DevIdx: LongInt; var timehidw: LongWord; var timelodw: LongWord; var subsec16ns: LongWord): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitGetStatus(DevIdx: LongInt; var wrstatus: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_WRabbitGetTermOutput(DevIdx: LongInt; buffer: PAnsiChar; var nchar: LongInt): LongInt; stdcall; external LIB_NAME;
+
+//for MultiHarp 160 with external FPGA only
+function MH_ExtFPGAInitLink(DevIdx: LongInt; linknumber: LongInt; on: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_ExtFPGAGetLinkStatus(DevIdx: LongInt; linknumber: LongInt; var status: LongWord): LongInt; stdcall; external LIB_NAME;
+function MH_ExtFPGASetMode(DevIdx: LongInt; mode: LongInt; loopback: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_ExtFPGAResetStreamFifos(DevIdx: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_ExtFPGAUserCommand(DevIdx: LongInt; write: LongInt; addr: LongWord; var data: LongWord): LongInt; stdcall; external LIB_NAME;
+
+//for final cleanup
 procedure MH_CloseAllDevices;
 
 const
@@ -288,7 +317,6 @@ const
   MH_ERROR_EEPROM_F15                = -78;
 
 
-
 //The following are bitmasks for return values from MH_GetWarnings
   WARNING_SYNC_RATE_ZERO            = $0001;
   WARNING_SYNC_RATE_VERY_LOW        = $0002;
@@ -335,6 +363,18 @@ const
   WR_STATUS_MAC_SET             = $00000800;  // user defined mac address is set
   WR_STATUS_IS_NEW              = $80000000;  // status updated since last check
 
+  //The following is only for use with an external FPGA connected to a MultiHarp 160
+  EXTFPGA_MODE_OFF              = 0;
+  EXTFPGA_MODE_T2RAW            = 1;
+  EXTFPGA_MODE_T2               = 2;
+  EXTFPGA_MODE_T3               = 3;
+
+  EXTFPGA_LOOPBACK_OFF          = 0;
+  EXTFPGA_LOOPBACK_CUSTOM       = 1;
+  EXTFPGA_LOOPBACK_T2           = 2;
+  EXTFPGA_LOOPBACK_T3           = 3;
+
+
 implementation
 
   procedure MH_CloseAllDevices;
@@ -356,4 +396,4 @@ initialization
   pcDebugInfo := pAnsiChar(@strDebugInfo[0]);
 finalization
   MH_CloseAllDevices;
-end.
+end.
