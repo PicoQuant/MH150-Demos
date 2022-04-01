@@ -1,17 +1,17 @@
 
-% Demo for access to MultiHarp 150/160 hardware via MHLIB v 3.0.
+% Demo for access to MultiHarp 150/160 hardware via MHLIB v 3.1.
 % The program performs a measurement based on hard coded settings.
 % The resulting histogram (65536 bins) is stored in an ASCII output file.
 %
 % Axel Hagen, PicoQuant, May 2020
-% Michael Wahl, PicoQuant, March 2021
+% Michael Wahl, PicoQuant, March 2022
 
 % Constants from mhdefin.h
 
-REQLIBVER   =     '3.0';    % this is the version this program expects
+REQLIBVER   =     '3.1';    % the library version this program expects
 MAXDEVNUM   =         8;
-MAXHISTBINS =     65536;	 % number of histogram channels
-MAXLENCODE  =         6;	 % max histogram length is 65536	
+MAXHISTBINS =     65536;    % number of histogram channels
+MAXLENCODE  =         6;    % max histogram length is 65536	
 MAXBINSTEPS =        24;
 MODE_HIST   =         0;
 MODE_T2	    =         2;
@@ -19,13 +19,13 @@ MODE_T3	    =         3;
 
 FLAG_OVERFLOW = hex2dec('0001');
 
-TRGLVLMIN	  =       -1200;	   % mV
-TRGLVLMAX	  =        1200;	   % mV
-OFFSETMIN	  =           0;	   % ns
-OFFSETMAX	  =   100000000;	   % ns
+TRGLVLMIN	  =       -1200;   % mV
+TRGLVLMAX	  =        1200;   % mV
+OFFSETMIN	  =           0;   % ns
+OFFSETMAX	  =   100000000;   % ns
 
-ACQTMIN		  =           1;	   % ms
-ACQTMAX		  =   360000000;	   % ms  (100*60*60*1000ms = 100h)
+ACQTMIN		  =           1;   % ms
+ACQTMAX		  =   360000000;   % ms  (100*60*60*1000ms = 100h)
 
 % Errorcodes from errorcodes.h
 
@@ -41,7 +41,7 @@ SyncDiv       =    1;     %  you can change this
 Binning       =    0;     %  you can change this
 Tacq          = 1000;     %  you can change this      
     
-fprintf('\nMultiHarp 150/160 MHLib Demo Application             PicoQuant 2021\n');
+fprintf('\nMultiHarp 150/160 MHLib Demo Application             PicoQuant 2022\n');
 
 if (~libisloaded('MHlib'))    
     %Attention: The header file name given below is case sensitive and must

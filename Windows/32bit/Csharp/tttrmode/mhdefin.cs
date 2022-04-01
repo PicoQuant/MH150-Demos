@@ -2,7 +2,7 @@
     MHLib programming library for MultiHarp 150/160
     PicoQuant GmbH 
 
-    Ver. 3.0.0.0     March 2021
+    Ver. 3.1.0.0     March 2022
 */
 
 using System;
@@ -15,11 +15,11 @@ public static class Constants
 {
   // the following constants are taken from mhdefin.h
   
-  public const string LIB_VERSION = "3.0";  // library version
+  public const string LIB_VERSION = "3.1";  // library version
 
   public const int MAXDEVNUM = 8;  // max num of USB devices
   
-  public const int MAXINPCHAN = 64;  // max num of physicl input channels
+  public const int MAXINPCHAN = 64;  // max num of physical input channels
   
   public const int BINSTEPSMAX = 24;  // max num of binning steps, get actual number via MH_GetBaseResolution()
   
@@ -122,6 +122,24 @@ public static class Constants
   //limits for MH_SetInputHysteresis
   public const int HYSTCODEMIN = 0;     // approx. 3mV
   public const int HYSTCODEMAX = 1;     // approx. 35mV
+
+  //limits for MH_SetOflCompression
+  public const int HOLDTIMEMIN = 0;     // ms
+  public const int HOLDTIMEMAX = 255;     // ms
+
+  //limits for MH_SetRowEventFilterXXX and MH_SetMainEventFilter
+  public const int ROWIDXMIN = 0;
+  public const int ROWIDXMAX = 8;     // actual upper limit is smaller, dep. on rows present
+  public const int MATCHCNTMIN = 1;     
+  public const int MATCHCNTMAX = 6; 
+  public const int INVERSEMIN = 0;
+  public const int INVERSEMAX = 1;
+  public const int TIMERANGEMIN = 0;     // ps
+  public const int TIMERANGEMAX = 160000;     // ps
+  public const int USECHANSMIN = 0x000;     // no channels used 
+  public const int USECHANSMAX = 0x1FF;     // note: sync bit 0x100 will be ignored in T3 mode and in row filter
+  public const int PASSCHANSMIN = 0x000;     // no channels passed 
+  public const int PASSCHANSMAX = 0x1FF;     // note: sync bit 0x100 will be ignored in T3 mode and in row filter
 
 
   

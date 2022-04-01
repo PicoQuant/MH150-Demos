@@ -1,10 +1,10 @@
 /************************************************************************
 
-  Demo access to MultiHarp 150/160 hardware via MHLIB v 3.0
+  Demo access to MultiHarp 150/160 hardware via MHLIB v 3.1
   The program performs a measurement based on hardcoded settings.
   The resulting histogram is stored in an ASCII output file.
 
-  Michael Wahl, PicoQuant GmbH, March 2021
+  Michael Wahl, PicoQuant GmbH, March 2022
 
   Note: This is a console application
 
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
   memset(Errorstring, 0x00, sizeof(Errorstring));
   memset(warningstext, 0x00, sizeof(warningstext));
 
-  printf("\nMultiHarp MHLib Demo Application                   PicoQuant GmbH, 2021");
+  printf("\nMultiHarp MHLib Demo Application                   PicoQuant GmbH, 2022");
   printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   MH_GetLibraryVersion(LIB_Version);
   printf("\nLibrary version is %s", LIB_Version);
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
     goto ex;
   }
 
-  retcode = MH_SetSyncChannelOffset(dev[0], 0);
+  retcode = MH_SetSyncChannelOffset(dev[0], 0); // emulate a cable delay
   if(retcode < 0)
   {
     MH_GetErrorString(Errorstring, retcode);
@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
     goto ex;
   }
 
-  for(i = 0; i < NumChannels; i++) // we use the same input offset for all channels
+  for(i = 0; i < NumChannels; i++) // we use the same input settings for all channels
   {
     retcode = MH_SetInputEdgeTrg(dev[0], i, InputTriggerLevel, InputTriggerEdge);
     if (retcode < 0)
@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
       goto ex;
     }
 
-    retcode = MH_SetInputChannelOffset(dev[0], i, 0);
+    retcode = MH_SetInputChannelOffset(dev[0], i, 0); // emulate a cable delay
     if(retcode < 0)
     {
       MH_GetErrorString(Errorstring, retcode);

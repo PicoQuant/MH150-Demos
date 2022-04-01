@@ -1,11 +1,9 @@
 {
-  MultiHarp 150/160  MHLIB v3.0  Usage Demo with Delphi or Lazarus
+  MultiHarp 150/160  MHLIB v3.1  Usage Demo with Delphi or Lazarus
   
   Tested with
-   - Delphi 10.1 on Windows 10
+   - Delphi 11.0 on Windows 10
    - Lazarus 2.0.12 / fpc 3.2.0 on Windows 10
-   - Lazarus 1.8.4 / fpc 3.0.4 on Windows 8
-   - Lazarus 2.0.8 / fpc 3.0.4 on Linux
 
   The program performs a TTTR measurement based on hardcoded settings.
   The resulting event data is stored in a binary output file.
@@ -13,6 +11,7 @@
   Axel Hagen, PicoQuant GmbH, May 2018
   Marcus Sackrow, PicoQuant GmbH, July 2019
   Michael Wahl, PicoQuant GmbH, May 2020, March 2021
+  Revised Matthias Patting, Stefan Eilers, PicoQuant GmbH, March 2022
 
   Note: This is a console application (i.e. run in Windows cmd box)
 
@@ -25,7 +24,7 @@
 
 program tttrmode;
 
-{$IFDEF WINDOWS}
+{$IF defined(MSWINDOWS)}
   {$APPTYPE CONSOLE}  //windows needs this, Linux does not want it
 {$ENDIF}
 
@@ -36,122 +35,121 @@ uses
   System.SysUtils,
   System.Ansistrings,
   {$endif}
-  mhlib in 'mhlib.pas';
+  MHLib in 'mhlib.pas';
 
 var
-  iRetCode           : longint;
-  outf               : File;
-  i                  : integer;
-  iWritten           : longint;
-  iFound             : integer =       0;
-  iProgress          : longint =       0;
-  bFiFoFull          : boolean =   false;
-  bTimeOut           : boolean =   false;
-  bFileError         : boolean =   false;
+  RetCode            : LongInt;
+  OutFile            : file;
+  i                  : Integer;
+  Written            : LongInt;
+  Found              : Integer =       0;
+  Progress           : LongInt =       0;
+  FiFoFull           : Boolean =   False;
+  MeasDone           : Boolean =   False;
+  FileError          : Boolean =   False;
 
 
-  iMode              : longint =      MODE_T2; // set T2 or T3 here, observe suitable Syncdivider and Range!
-  iBinning           : longint =            0; // you can change this (meaningless in T2 mode)
-  iOffset            : longint =            0; // normally no need to change this
-  iTAcq              : longint =        10000; // you can change this, unit is millisec
-  iSyncDivider       : longint =            1; // you can change this
-  iSyncTrgEdge       : longint = EDGE_FALLING; // you can change this
-  iSyncTrgLevel      : longint =          -50; // you can change this (mV)
-  iSyncChannelOffset : longint =            0; // you can change this (like a cable delay)
-  iInputTrgEdge      : longint = EDGE_FALLING; // you can change this
-  iInputTrgLevel     : longint =          -50; // you can change this (mV)
-  iInputChannelOffset: longint =            0; // you can change this (like a cable delay)
+  Mode               : LongInt =      MODE_T3; // set T2 or T3 here, observe suitable Syncdivider and Range!
+  Binning            : LongInt =            0; // you can change this (meaningless in T2 mode)
+  Offset             : LongInt =            0; // normally no need to change this
+  TAcq               : LongInt =        1000; // you can change this, unit is millisec
+  SyncDivider        : LongInt =            1; // you can change this
+  SyncTrgEdge        : LongInt = EDGE_FALLING; // you can change this
+  SyncTrgLevel       : LongInt =          -50; // you can change this (mV)
+  SyncChannelOffset  : LongInt =            0; // you can change this (like a cable delay)
+  InputTrgEdge       : LongInt = EDGE_FALLING; // you can change this
+  InputTrgLevel      : LongInt =          -50; // you can change this (mV)
+  InputChannelOffset : LongInt =            0; // you can change this (like a cable delay)
 
-  iNumChannels       : longint;
-  iChanIdx           : longint;
-  dResolution        : double;
-  iSyncRate          : longint;
-  iCountRate         : longint;
-  iCTCStatus         : longint;
-  iFlags             : longint;
-  iRecords           : longint;
-  iWarnings          : longint;
+  NumChannels        : LongInt;
+  ChanIdx            : LongInt;
+  Resolution         : Double;
+  SyncRate           : LongInt;
+  CountRate          : LongInt;
+  CTCStatus          : LongInt;
+  Flags              : LongInt;
+  Records            : LongInt;
+  Warnings           : LongInt;
 
-  lwBuffer           : array [0..TTREADMAX -1 ] of LongWord;
+  Buffer             : array[0..TTREADMAX - 1] of LongWord;
 
-  procedure ex (iRetCode : integer);
+procedure Ex(RetCode: Integer);
+begin
+  if RetCode <> MH_ERROR_NONE then
   begin
-    if iRetCode <> MH_ERROR_NONE
-    then begin
-      MH_GetErrorString (pcErrText, iRetCode);
-      writeln ('Error ', iRetCode:3, ' = "', Trim (string(strErrText)), '"');
-    end;
-    writeln;
-    {$I-}
-      closefile (outf);
-      IOResult();
-    {$I+}
-    writeln('press RETURN to exit');
-    readln;
-    halt (iRetCode);
+    MH_GetErrorString(pcErrText, RetCode);
+    Writeln('Error ', RetCode:3, ' = "', Trim (string(strErrText)), '"');
   end;
+  Writeln;
+  {$I-}
+    CloseFile(OutFile);
+    IOResult();
+  {$I+}
+  Writeln('press RETURN to exit');
+  Readln;
+  Halt(RetCode);
+end;
 
 begin
-  writeln;
-  writeln ('MultiHarp  MHLib  Usage Demo                        PicoQuant GmbH, 2021');
-  writeln ('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-  iRetCode := MH_GetLibraryVersion (pcLibVers);
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_GetLibraryVersion error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
+  Writeln;
+  Writeln('MultiHarp  MHLib  Usage Demo                        PicoQuant GmbH, 2022');
+  Writeln('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+  RetCode := MH_GetLibraryVersion (pcLibVers);
+  if RetCode <> MH_ERROR_NONE then
+  begin
+    Writeln('MH_GetLibraryVersion error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
   end;
-  writeln ('MHLIB version is ' + strLibVers);
-  if trim (string(strLibVers)) <> trim (AnsiString (LIB_VERSION))
-  then
-    writeln ('Warning: The application was built for version ' + LIB_VERSION);
+  Writeln('MHLIB version is ' + strLibVers);
+  if Trim(string(strLibVers)) <> Trim(AnsiString(LIB_VERSION)) then
+    Writeln('Warning: The application was built for version ' + LIB_VERSION);
 
-  assignfile (outf, 'tttrmode.out');
+  AssignFile(OutFile, 'tttrmode.out');
   {$I-}
-    rewrite (outf, 4);
+    Rewrite(OutFile, 4);
   {$I+}
   if IOResult <> 0 then
   begin
-    writeln ('cannot open output file');
-    ex (MH_ERROR_NONE);
+    Writeln('cannot open output file');
+    Ex(MH_ERROR_NONE);
   end;
 
-  writeln;
-  writeln ('Mode               : ', iMode);
-  writeln ('Binning            : ', iBinning);
-  writeln ('Offset             : ', iOffset);
-  writeln ('AcquisitionTime    : ', iTacq);
-  writeln ('SyncDivider        : ', iSyncDivider);
-  writeln ('SyncTrgEdge        : ', iSyncTrgEdge);
-  writeln ('SyncTrgLevel       : ', iSyncTrgLevel);
-  writeln ('SyncChannelOffset  : ', iSyncChannelOffset);
-  writeln ('InputTrgEdge       : ', iInputTrgEdge);
-  writeln ('InputTrgLevel      : ', iInputTrgLevel);
-  writeln ('InputChannelOffset : ', iInputChannelOffset);
+  Writeln;
+  Writeln('Mode               : ', Mode);
+  Writeln('Binning            : ', Binning);
+  Writeln('Offset             : ', Offset);
+  Writeln('AcquisitionTime    : ', TAcq);
+  Writeln('SyncDivider        : ', SyncDivider);
+  Writeln('SyncTrgEdge        : ', SyncTrgEdge);
+  Writeln('SyncTrgLevel       : ', SyncTrgLevel);
+  Writeln('SyncChannelOffset  : ', SyncChannelOffset);
+  Writeln('InputTrgEdge       : ', InputTrgEdge);
+  Writeln('InputTrgLevel      : ', InputTrgLevel);
+  Writeln('InputChannelOffset : ', InputChannelOffset);
 
-  writeln;
-  writeln ('Searching for MultiHarp devices...');
-  writeln ('Devidx     Status');
+  Writeln;
+  Writeln('Searching for MultiHarp devices...');
+  Writeln('Devidx     Status');
 
-  for i:=0 to MAXDEVNUM - 1 do
+  for i := 0 to MAXDEVNUM - 1 do
   begin
-    iRetCode := MH_OpenDevice (i, pcHWSerNr);
+    RetCode := MH_OpenDevice(i, pcHWSerNr);
     //
-    if iRetCode = MH_ERROR_NONE
-    then begin
+    if RetCode = MH_ERROR_NONE then
+    begin
       // Grab any MultiHarp we can open
-      iDevIdx [iFound] := i; // keep index to devices we want to use
-      inc (iFound);
-      writeln ('   ', i, '      S/N ', strHWSerNr);
+      DevIdx[Found] := i; // keep index to devices we want to use
+      Inc(Found);
+      Writeln('   ', i, '      S/N ', strHWSerNr);
     end
     else
     begin
-      if iRetCode = MH_ERROR_DEVICE_OPEN_FAIL
-      then
-        writeln ('   ', i, '       no device')
-      else begin
-        MH_GetErrorString (pcErrText, iRetCode);
-        writeln ('   ', i, '       ', Trim (string(strErrText)));
+      if RetCode = MH_ERROR_DEVICE_OPEN_FAIL then
+        Writeln('   ', i, '       no device')
+      else
+      begin
+        MH_GetErrorString(pcErrText, RetCode);
+        Writeln('   ', i, '       ', Trim(string(strErrText)));
       end;
     end;
   end;
@@ -161,230 +159,230 @@ begin
   // you could also check for a specific serial number, so that you
   // always know which physical device you are talking to.
 
-  if iFound < 1 then
+  if Found < 1 then
   begin
-    writeln ('No device available.');
-    ex (MH_ERROR_NONE);
+    Writeln('No device available.');
+    Ex(MH_ERROR_NONE);
   end;
 
-  writeln ('Using device ', iDevIdx[0]);
-  writeln ('Initializing the device...');
+  Writeln('Using device ', DevIdx[0]);
+  Writeln('Initializing the device...');
 
-  iRetCode := MH_Initialize (iDevIdx[0], iMode, 0); //with internal clock
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_Initialize error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
+  RetCode := MH_Initialize(DevIdx[0], Mode, 0); //with internal clock
+  if RetCode <> MH_ERROR_NONE then
+  begin
+    Writeln('MH_Initialize error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
   end;
 
-  iRetCode := MH_GetHardwareInfo (iDevIdx[0], pcHWModel, pcHWPartNo, pcHWVersion); // this is only for information
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_GetHardwareInfo error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
+  RetCode := MH_GetHardwareInfo(DevIdx[0], pcHWModel, pcHWPartNo, pcHWVersion); // this is only for information
+  if RetCode <> MH_ERROR_NONE then
+  begin
+    Writeln('MH_GetHardwareInfo error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
   end
   else
-    writeln ('Found Model ', strHWModel,'  Part no ', strHWPartNo,'  Version ', strHWVersion);
+    Writeln('Found Model ', strHWModel,'  Part no ', strHWPartNo,'  Version ', strHWVersion);
 
-  iRetCode := MH_GetNumOfInputChannels (iDevIdx[0], iNumChannels);
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_GetNumOfInputChannels error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
+  RetCode := MH_GetNumOfInputChannels(DevIdx[0], NumChannels);
+  if RetCode <> MH_ERROR_NONE then
+  begin
+    Writeln('MH_GetNumOfInputChannels error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
   end
   else
-    writeln ('Device has ', iNumChannels, ' input channels.');
+    Writeln('Device has ', NumChannels, ' input channels.');
 
-  writeln;
+  Writeln;
 
-  iRetCode := MH_SetSyncDiv (iDevIdx[0], iSyncDivider);
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_SetSyncDiv error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
-  end;
-
-  iRetCode := MH_SetSyncEdgeTrg (iDevIdx[0], iSyncTrgLevel, iSyncTrgEdge);
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_SetSyncEdgeTrg error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
-  end;
-
-  iRetCode := MH_SetSyncChannelOffset (iDevIdx[0], iSyncChannelOffset);
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_SetSyncChannelOffset error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
-  end;
-
-  for iChanIdx := 0 to iNumChannels - 1 do // we use the same input settings for all channels
+  RetCode := MH_SetSyncDiv(DevIdx[0], SyncDivider);
+  if RetCode <> MH_ERROR_NONE then
   begin
-    iRetCode := MH_SetInputEdgeTrg (iDevIdx[0], iChanIdx, iInputTrgLevel, iInputTrgEdge);
-    if iRetCode <> MH_ERROR_NONE
-    then begin
-      writeln ('MH_SetInputEdgeTrg channel ', iChanIdx:2, ' error ', iRetCode:3, '. Aborted.');
-      ex (iRetCode);
+    Writeln('MH_SetSyncDiv error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
+  end;
+
+  RetCode := MH_SetSyncEdgeTrg(DevIdx[0], SyncTrgLevel, SyncTrgEdge);
+  if RetCode <> MH_ERROR_NONE then
+  begin
+    Writeln('MH_SetSyncEdgeTrg error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
+  end;
+
+  RetCode := MH_SetSyncChannelOffset(DevIdx[0], SyncChannelOffset);
+  if RetCode <> MH_ERROR_NONE then
+  begin
+    Writeln('MH_SetSyncChannelOffset error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
+  end;
+
+  for ChanIdx := 0 to NumChannels - 1 do // we use the same input settings for all channels
+  begin
+    RetCode := MH_SetInputEdgeTrg (DevIdx[0], ChanIdx, InputTrgLevel, InputTrgEdge);
+    if RetCode <> MH_ERROR_NONE then
+    begin
+      Writeln('MH_SetInputEdgeTrg channel ', ChanIdx:2, ' error ', RetCode:3, '. Aborted.');
+      Ex(RetCode);
     end;
 
-    iRetCode := MH_SetInputChannelOffset (iDevIdx[0], iChanIdx, iInputChannelOffset);
-    if iRetCode <> MH_ERROR_NONE
-    then begin
-      writeln ('MH_SetInputChannelOffset channel ', iChanIdx:2, ' error ', iRetCode:3, '. Aborted.');
-      ex (iRetCode);
+    RetCode := MH_SetInputChannelOffset(DevIdx[0], ChanIdx, InputChannelOffset);
+    if RetCode <> MH_ERROR_NONE then
+    begin
+      Writeln('MH_SetInputChannelOffset channel ', ChanIdx:2, ' error ', RetCode:3, '. Aborted.');
+      Ex(RetCode);
     end;
 
-    iRetCode := MH_SetInputChannelEnable (iDevIdx[0], iChanIdx, 1);
-    if iRetCode <> MH_ERROR_NONE
-    then begin
-      writeln ('MH_SetInputChannelEnable channel ', iChanIdx:2, ' error ', iRetCode:3, '. Aborted.');
-      ex (iRetCode);
+    RetCode := MH_SetInputChannelEnable(DevIdx[0], ChanIdx, 1);
+    if RetCode <> MH_ERROR_NONE then
+    begin
+      Writeln('MH_SetInputChannelEnable channel ', ChanIdx:2, ' error ', RetCode:3, '. Aborted.');
+      Ex(RetCode);
     end;
   end;
 
-  if (iMode <> MODE_T2)                      // These are meaningless in T2 mode
-  then begin
-    iRetCode := MH_SetBinning (iDevIdx[0], iBinning);
-    if iRetCode <> MH_ERROR_NONE
-    then begin
-      writeln ('MH_SetBinning error ', iRetCode:3, '. Aborted.');
-      ex (iRetCode);
+  if (Mode <> MODE_T2) then                  // These are meaningless in T2 mode
+  begin
+    RetCode := MH_SetBinning(DevIdx[0], Binning);
+    if RetCode <> MH_ERROR_NONE then
+    begin
+      Writeln('MH_SetBinning error ', RetCode:3, '. Aborted.');
+      Ex(RetCode);
     end;
 
-    iRetCode := MH_SetOffset(iDevIdx[0], iOffset);
-    if iRetCode <> MH_ERROR_NONE
-    then begin
-      writeln ('MH_SetOffset error ', iRetCode:3, '. Aborted.');
-      ex (iRetCode);
+    RetCode := MH_SetOffset(DevIdx[0], Offset);
+    if RetCode <> MH_ERROR_NONE then
+    begin
+      Writeln('MH_SetOffset error ', RetCode:3, '. Aborted.');
+      Ex(RetCode);
     end;
 
-    iRetCode := MH_GetResolution (iDevIdx[0], dResolution);
-    if iRetCode <> MH_ERROR_NONE
-    then begin
-      writeln ('MH_GetResolution error ', iRetCode:3, '. Aborted.');
-      ex (iRetCode);
+    RetCode := MH_GetResolution(DevIdx[0], Resolution);
+    if RetCode <> MH_ERROR_NONE then
+    begin
+      Writeln('MH_GetResolution error ', RetCode:3, '. Aborted.');
+      Ex(RetCode);
     end;
-    writeln ('Resolution is ', dResolution:7:3, 'ps');
+    Writeln('Resolution is ', Resolution:7:3, 'ps');
   end;
 
   // Note: After Init or SetSyncDiv you must allow > 400 ms for valid new count rate readings
   // otherwise you get new values after every 100 ms
-  Sleep (400);
+  Sleep(400);
 
-  writeln;
+  Writeln;
 
-  iRetCode := MH_GetSyncRate (iDevIdx[0], iSyncRate);
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_GetSyncRate error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
-  end;
-  writeln ('SyncRate = ', iSyncRate, '/s');
-
-  writeln;
-
-  for iChanIdx := 0 to iNumChannels - 1 do // for all channels
+  RetCode := MH_GetSyncRate(DevIdx[0], SyncRate);
+  if RetCode <> MH_ERROR_NONE then
   begin
-    iRetCode := MH_GetCountRate (iDevIdx[0], iChanIdx, iCountRate);
-    if iRetCode <> MH_ERROR_NONE
-    then begin
-      writeln ('MH_GetCountRate error ', iRetCode:3, '. Aborted.');
-      ex (iRetCode);
+    Writeln('MH_GetSyncRate error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
+  end;
+  Writeln('SyncRate = ', SyncRate, '/s');
+
+  Writeln;
+
+  for ChanIdx := 0 to NumChannels - 1 do // for all channels
+  begin
+    RetCode := MH_GetCountRate(DevIdx[0], ChanIdx, CountRate);
+    if RetCode <> MH_ERROR_NONE then
+    begin
+      Writeln('MH_GetCountRate error ', RetCode:3, '. Aborted.');
+      Ex(RetCode);
     end;
-    writeln ('Countrate [', iChanIdx:2, '] = ', iCountRate:8, '/s');
+    Writeln('Countrate [', ChanIdx:2, '] = ', CountRate:8, '/s');
   end;
 
-  writeln;
+  Writeln;
 
-  iRetCode := MH_GetWarnings(iDevIdx[0], iWarnings);
-  if iRetCode <> MH_ERROR_NONE
-  then begin
-    writeln ('MH_GetWarnings error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
-  end;
-  if iWarnings <> 0 then
+  RetCode := MH_GetWarnings(DevIdx[0], Warnings);
+  if RetCode <> MH_ERROR_NONE then
   begin
-    MH_GetWarningsText(iDevIdx[0], pcWtext, iWarnings);
-    writeln (strWtext);
+    Writeln('MH_GetWarnings error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
   end;
-
-  iRetCode := MH_StartMeas (iDevIdx[0], iTacq);
-  if iRetCode <> MH_ERROR_NONE then
+  if Warnings <> 0 then
   begin
-    writeln ('MH_StartMeas error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
+    MH_GetWarningsText(DevIdx[0], pcWtext, Warnings);
+    Writeln(strWtext);
   end;
-  writeln ('Measuring for ', iTacq, ' milliseconds...');
 
-  iProgress := 0;
-  write (#8#8#8#8#8#8#8#8#8, iProgress:9);
+  RetCode := MH_StartMeas(DevIdx[0], TAcq);
+  if RetCode <> MH_ERROR_NONE then
+  begin
+    Writeln('MH_StartMeas error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
+  end;
+  Writeln('Measuring for ', TAcq, ' milliseconds...');
+
+  Progress := 0;
+  Write(#8#8#8#8#8#8#8#8#8, Progress:9);
 
   repeat
-    iRetCode := MH_GetFlags (iDevIdx[0], iFlags);
-    if iRetCode <> MH_ERROR_NONE then
+    RetCode := MH_GetFlags(DevIdx[0], Flags);
+    if RetCode <> MH_ERROR_NONE then
     begin
-      writeln ('MH_GetFlags error ', iRetCode:3, '. Aborted.');
-      ex (iRetCode);
+      Writeln('MH_GetFlags error ', RetCode:3, '. Aborted.');
+      Ex(RetCode);
     end;
-    bFiFoFull := (iFlags and FLAG_FIFOFULL) > 0;
+    FiFoFull := (Flags and FLAG_FIFOFULL) > 0;
 
-    if bFiFoFull then
+    if FiFoFull then
       writeln ('  FiFo Overrun!')
     else
     begin
-      iRetCode := MH_ReadFiFo (iDevIdx[0], lwBuffer[0], iRecords); // may return less!
-      if iRetCode <> MH_ERROR_NONE then
+      RetCode := MH_ReadFiFo(DevIdx[0], Buffer[0], Records); // may return less!
+      if RetCode <> MH_ERROR_NONE then
       begin
-        writeln ('MH_TTReadData error ', iRetCode:3, '. Aborted.');
-        ex (iRetCode);
+        Writeln('MH_TTReadData error ', RetCode:3, '. Aborted.');
+        Ex(RetCode);
       end;
 
-      if (iRecords > 0)then
+      if Records > 0 then
       begin
-        blockwrite (outf, lwBuffer[0], iRecords, iWritten);
-        if iRecords <> iWritten then
+        BlockWrite(OutFile, Buffer[0], Records, Written);
+        if Records <> Written then
         begin
-          writeln;
-          writeln ('file write error');
-          bFileError := true;
+          Writeln;
+          Writeln('file write error');
+          FileError := True;
         end;
 
-        iProgress := iProgress + iWritten;
-        write (#8#8#8#8#8#8#8#8#8, iProgress:9);
+        Progress := Progress + Written;
+        Write(#8#8#8#8#8#8#8#8#8, Progress:9);
       end
       else
       begin
-        iRetCode := MH_CTCStatus (iDevIdx[0], iCTCStatus);
-        if iRetCode <> MH_ERROR_NONE then
+        RetCode := MH_CTCStatus(DevIdx[0], CTCStatus);
+        if RetCode <> MH_ERROR_NONE then
         begin
-          writeln;
-          writeln ('MH_CTCStatus error ', iRetCode:3, '. Aborted.');
-          ex (iRetCode);
+          Writeln;
+          Writeln('MH_CTCStatus error ', RetCode:3, '. Aborted.');
+          Ex(RetCode);
         end;
-        bTimeOut := (iCTCStatus <> 0);
-        if bTimeOut then
+        MeasDone := (CTCStatus <> 0);
+        if MeasDone then
         begin
-          writeln;
-          writeln('Done');
+          Writeln;
+          Writeln('Done');
         end;
       end;
     end;
 
-  until  bFiFoFull or bTimeOut or bFileError;
+  until FiFoFull or MeasDone or FileError;
 
-  writeln;
+  Writeln;
 
-  iRetCode := MH_StopMeas (iDevIdx[0]);
-  if iRetCode <> MH_ERROR_NONE then
+  RetCode := MH_StopMeas(DevIdx[0]);
+  if RetCode <> MH_ERROR_NONE then
   begin
-    writeln ('MH_StopMeas error ', iRetCode:3, '. Aborted.');
-    ex (iRetCode);
+    Writeln('MH_StopMeas error ', RetCode:3, '. Aborted.');
+    Ex(RetCode);
   end;
 
-  writeln;
+  Writeln;
 
   MH_CloseAllDevices;
 
-  ex (MH_ERROR_NONE);
+  Ex(MH_ERROR_NONE);
 end.
 

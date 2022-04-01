@@ -2,7 +2,7 @@
     MHLib programming library for MultiHarp 150/160
     PicoQuant GmbH 
 
-    Ver. 3.0.0.0     March 2021
+    Ver. 3.1.0.0     March 2022
 */
 
 using System;
@@ -16,12 +16,12 @@ public static class mhlib
 {
   #if WINDOWS //unfortunately this is not predefined, must define it as compiler directive
     #if x64
-      const string MHLib = "MHlib64"; 
+      public const string MHLib = "MHlib64"; 
     #else
-      const string MHLib = "Mhlib";
+      public const string MHLib = "Mhlib";
     #endif
   #else  
-    const string MHLib = "libmh150"; //note this is a symlink to mhlib.so
+    public const string MHLib = "libmh150"; //note this is a symlink to mhlib.so
   #endif
   
 
@@ -57,6 +57,8 @@ public static class mhlib
   [DllImport(MHLib)]
   extern public static int MH_SetSyncChannelOffset(int devidx, int value);
   [DllImport(MHLib)]
+  extern public static int MH_SetSyncChannelEnable(int devidx, int enable);
+  [DllImport(MHLib)]
   extern public static int MH_SetSyncDeadTime(int devidx, int on, int deadtime);  //new in v1.1
 
   [DllImport(MHLib)]
@@ -77,7 +79,7 @@ public static class mhlib
   [DllImport(MHLib)]
   extern public static int MH_SetOffset(int devidx, int offset);
   [DllImport(MHLib)]
-  extern public static int MH_SetHistoLen(int devidx, int lencode, ref int actuallen);
+  extern public static int MH_SetHistoLen(int devidx, int lencode, out int actuallen);
   [DllImport(MHLib)]
   extern public static int MH_SetMeasControl(int devidx, int control, int startedge, int stopedge);
   [DllImport(MHLib)]
@@ -109,7 +111,7 @@ public static class mhlib
   [DllImport(MHLib)]
   extern public static int MH_GetFlags(int devidx, ref int flags);
   [DllImport(MHLib)]
-  extern public static int MH_GetElapsedMeasTime(int devidx, ref double elapsed);
+  extern public static int MH_GetElapsedMeasTime(int devidx, out double elapsed);
   [DllImport(MHLib)]
   extern public static int MH_GetStartTime(int devidx, ref uint timedw2, ref uint timedw1, ref uint timedw0);
  
@@ -118,7 +120,9 @@ public static class mhlib
   [DllImport(MHLib)]
   extern public static int MH_GetWarningsText(int devidx, StringBuilder text, int warnings);
 
-  // for TT modes
+  // for the time tagging modes only
+  [DllImport(MHLib)]
+  extern public static int MH_SetOflCompression(int devidx, int holdtime);  //new since v3.1
   [DllImport(MHLib)]
   extern public static int MH_SetMarkerHoldoffTime(int devidx, int holdofftime);
   [DllImport(MHLib)]
@@ -127,6 +131,28 @@ public static class mhlib
   extern public static int MH_SetMarkerEnable(int devidx, int en1, int en2, int en3, int en4);
   [DllImport(MHLib)]
   extern public static int MH_ReadFiFo(int devidx, uint[] buffer, ref int nactual);
+
+
+//for event filtering, time tagging modes only
+  [DllImport(MHLib)]
+  extern public static int MH_SetRowEventFilter(int devidx, int rowidx, int timerange, int matchcnt, int inverse, int usechannels, int passchannels);
+  [DllImport(MHLib)]
+  extern public static int MH_EnableRowEventFilter(int devidx, int rowidx, int enable);
+  [DllImport(MHLib)]
+  extern public static int MH_SetMainEventFilterParams(int devidx, int timerange, int matchcnt, int inverse);
+  [DllImport(MHLib)]
+  extern public static int MH_SetMainEventFilterChannels(int devidx, int rowidx, int usechannels, int passchannels);
+  [DllImport(MHLib)]
+  extern public static int MH_EnableMainEventFilter(int devidx, int enable);
+  [DllImport(MHLib)]
+  extern public static int MH_SetFilterTestMode(int devidx, int testmode);
+  [DllImport(MHLib)]
+  extern public static int MH_GetRowFilteredRates(int devidx, ref int syncrate, int[] cntrates);
+  [DllImport(MHLib)]
+  extern public static int MH_GetMainFilteredRates(int devidx, ref int syncrate, int[] cntrates);
+
+
+
 
   [DllImport(MHLib)]
   extern public static int MH_GetDebugInfo(int devidx, StringBuilder debuginfo);

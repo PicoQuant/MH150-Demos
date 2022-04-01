@@ -3,11 +3,11 @@
     MHLib programming library for MultiHarp 150/160
     PicoQuant GmbH 
 
-    Ver. 3.0.0.0     March 2021
+    Ver. 3.1.0.0     March 2022
 */
 
 
-#define LIB_VERSION "3.0"	// library version
+#define LIB_VERSION "3.1"	// library version
 
 #define MAXDEVNUM   8       // max number of USB devices
  
@@ -45,6 +45,7 @@
 #define MEASCTRL_C1_START_C2_STOP          3
 #define MEASCTRL_WR_M2S                    4
 #define MEASCTRL_WR_S2M                    5
+#define MEASCTRL_SW_START_SW_STOP          6 //new since v3.1
 
 //symb. const. for MH_SetMeasControl, MH_SetSyncEdgeTrg and MH_SetInputEdgeTrg
 #define EDGE_RISING   1
@@ -57,8 +58,9 @@
 #define FEATURE_LOWRES    0x0008  // Long range mode available 
 #define FEATURE_TRIGOUT   0x0010  // Trigger output available
 #define FEATURE_PROG_TD   0x0020  // Programmable deadtime available
-#define FEATURE_EXT_FPGA  0x0040  // Interface for External FPGA available
+#define FEATURE_EXT_FPGA  0x0040  // Interface for external FPGA available
 #define FEATURE_PROG_HYST 0x0080  // Programmable input hysteresis available
+#define FEATURE_EVNT_FILT 0x0100  // Coincidence filtering available
 
 //bitmasks for results from MH_GetFlags
 #define FLAG_OVERFLOW     0x0001  // histo mode only
@@ -115,6 +117,23 @@
 #define HYSTCODEMIN         0     // approx. 3mV
 #define HYSTCODEMAX         1     // approx. 35mV
 
+//limits for MH_SetOflCompression
+#define HOLDTIMEMIN         0     // ms
+#define HOLDTIMEMAX       255     // ms
+
+//limits for MH_SetRowEventFilterXXX and MH_SetMainEventFilter
+#define ROWIDXMIN           0
+#define ROWIDXMAX           8     // actual upper limit is smaller, dep. on rows present
+#define MATCHCNTMIN         1     
+#define MATCHCNTMAX         6 
+#define INVERSEMIN          0
+#define INVERSEMAX          1
+#define TIMERANGEMIN        0     // ps
+#define TIMERANGEMAX   160000     // ps
+#define USECHANSMIN     0x000     // no channels used 
+#define USECHANSMAX     0x1FF     // note: sync bit 0x100 will be ignored in T3 mode and in row filter
+#define PASSCHANSMIN    0x000     // no channels passed 
+#define PASSCHANSMAX    0x1FF     // note: sync bit 0x100 will be ignored in T3 mode and in row filter
 
 //The following are bitmasks for results from GetWarnings()
 

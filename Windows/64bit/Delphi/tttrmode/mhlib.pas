@@ -1,14 +1,14 @@
-Unit MHLib;
+unit MHLib;
 {                                                               }
 { Functions exported by the MultiHarp programming library MHLib }
 {                                                               }
-{ Ver. 3.0    March 2021                                        }
+{ Ver. 3.1    March 2022                                        }
 {                                                               }
 
 interface
 
 const
-  LIB_VERSION    =      '3.0';
+  LIB_VERSION    =      '3.1';
 {$UNDEF PLATFORM_OK}
 {$IFDEF WIN32}
   LIB_NAME       =      'mhlib.dll';  // Windows 32 bit
@@ -28,13 +28,15 @@ const
 
   MAXDEVNUM      =          8;   // max num of USB devices
 
-  MHMAXINPCHAN   =         64;   // max num of input channels
+  MAXINPCHAN     =         64;   // max num of physical input channels
 
-  MAXBINSTEPS    =         24;   // get actual number via HH_GetBaseResolution() !
+  MAXBINSTEPS    =         24;   // max number of binning steps,
+                                 // get actual number via HH_GetBaseResolution() !
 
   MAXHISTLEN     =      65536;   // max number of histogram bins
 
-  TTREADMAX      =     1048576;   // 1M event records can be read in one chunk
+  TTREADMAX      =     1048576;   // number of event records that can be read by MH_ReadFiFo
+                                  // buffer must provide space for this number of dwords
 
   //symbolic constants for MH_Initialize
   REFSRC_INTERNAL          = 0; // use internal clock
@@ -60,6 +62,7 @@ const
   MEASCTRL_C1_START_C2_STOP   = 3;
   MEASCTRL_WR_M2S             = 4;
   MEASCTRL_WR_S2M             = 5;
+  MEASCTRL_SW_START_SW_STOP   = 6;
 
   //symb. const. for MH_SetMeasControl, MH_SetSyncEdgeTrg and MH_SetInputEdgeTrg
   EDGE_RISING    = 1;
@@ -74,6 +77,7 @@ const
   FEATURE_PROG_TD   = $0020; // Programmable deadtime available
   FEATURE_EXT_FPGA  = $0040; // Interface for External FPGA available
   FEATURE_PROG_HYST = $0080; // Programmable input hysteresis available
+  FEATURE_EVNT_FILT = $0100; // Coincidence filtering available
 
   //bitmasks for results from MH_GetFlags
   FLAG_OVERFLOW     =      $0001;   // histo mode only
@@ -123,12 +127,31 @@ const
   TRIGOUTMAX =     16777215; // in units of 100ns
 
   //limits for MH_SetMarkerHoldoffTime
-  HOLDOFFMIN =            0;  // ns
-  HOLDOFFMAX =        25500;  // ns
+  HOLDOFFMIN =            0; // ns
+  HOLDOFFMAX =        25500; // ns
 
   //limits for MH_SetInputHysteresis
-  HYSTCODEMIN =           0;  // approx. 3mV
-  HYSTCODEMAX =           1;  // approx. 35mV
+  HYSTCODEMIN =           0; // approx. 3mV
+  HYSTCODEMAX =           1; // approx. 35mV
+
+  //limits for MH_SetOflCompression
+  HOLDTIMEMIN =           0; // ms
+  HOLDTIMEMAX =         255; // ms
+
+
+  //limits for MH_SetRowEventFilterXXX and MH_SetMainEventFilter
+  ROWIDXMIN   =           0;
+  ROWIDXMAX   =           8; // actual upper limit is smaller, dep. on rows present
+  MATCHCNTMIN =           1;     
+  MATCHCNTMAX =           6; 
+  INVERSEMIN  =           0;
+  INVERSEMAX  =           1;
+  TIMERANGEMIN=           0; // ps
+  TIMERANGEMAX=      160000; // ps
+  USECHANSMIN =       $000; // no channels used
+  USECHANSMAX =       $1FF; // note: sync bit 0x100 will be ignored in T3 mode and in row filter
+  PASSCHANSMIN=       $000; // no channels passed
+  PASSCHANSMAX=       $1FF; // note: sync bit 0x100 will be ignored in T3 mode and in row filter
 
 var
   pcLibVers      : pAnsiChar;
@@ -148,7 +171,7 @@ var
   pcDebugInfo    : pAnsiChar;
   strDebugInfo   : array [0.. 16384] of AnsiChar;
 
-  iDevIdx        : array [0..MAXDEVNUM - 1] of LongInt;
+  DevIdx        : array [0..MAXDEVNUM - 1] of LongInt;
 
 
 function MH_GetLibraryVersion(Vers: PAnsiChar): LongInt; stdcall; external LIB_NAME;
@@ -169,6 +192,7 @@ function MH_GetNumOfInputChannels(DevIdx: LongInt; var NChannels: LongInt): Long
 function MH_SetSyncDiv(DevIdx: LongInt; SyncDiv: LongInt): LongInt; stdcall; external LIB_NAME;
 function MH_SetSyncEdgeTrg(DevIdx: LongInt; Level: LongInt; Edge: LongInt): LongInt; stdcall; external LIB_NAME;
 function MH_SetSyncChannelOffset(DevIdx: LongInt; Value: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetSyncChannelEnable(DevIdx: LongInt; Enable: LongInt): LongInt; stdcall; external LIB_NAME; //new since v3.1
 function MH_SetSyncDeadTime(Devidx: LongInt; IsOn: LongInt; DeadTime: LongInt): LongInt; stdcall; external LIB_NAME; //new in v1.1
 
 function MH_SetInputEdgeTrg(DevIdx: LongInt; channel: LongInt; level: LongInt; edge: LongInt): LongInt; stdcall; external LIB_NAME;
@@ -204,10 +228,21 @@ function MH_GetWarnings(DevIdx: LongInt; var warnings: LongInt): LongInt; stdcal
 function MH_GetWarningsText(DevIdx: LongInt; text: PAnsiChar; warnings: LongInt): LongInt; stdcall; external LIB_NAME;
 
 // for the time tagging modes only
+function MH_SetOflCompression(DevIdx: LongInt; HoldTime: LongInt): LongInt; stdcall; external LIB_NAME; //new since v3.1
 function MH_SetMarkerHoldoffTime(DevIdx: LongInt; holdofftime: LongInt): LongInt; stdcall; external LIB_NAME;
 function MH_SetMarkerEdges(DevIdx: LongInt; me1: LongInt; me2: LongInt; me3: LongInt; me4: LongInt): LongInt; stdcall; external LIB_NAME;
 function MH_SetMarkerEnable(DevIdx: LongInt; en1: LongInt; en2: LongInt; en3: LongInt; en4: LongInt): LongInt; stdcall; external LIB_NAME;
 function MH_ReadFiFo(DevIdx: LongInt; var buffer: LongWord; var nactual: LongInt): LongInt; stdcall; external LIB_NAME;
+
+//for event filtering, time tagging modes only
+function MH_SetRowEventFilter(DevIdx: LongInt; rowidx: LongInt; timerange: LongInt; matchcnt: LongInt; inverse: LongInt; usechannels: LongInt; passchannels: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_EnableRowEventFilter(DevIdx: LongInt;  rowidx: LongInt; enable: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetMainEventFilterParams(DevIdx: LongInt; timerange: LongInt; matchcnt: LongInt; inverse: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetMainEventFilterChannels(DevIdx: LongInt;  rowidx: LongInt; usechannels: LongInt; passchannels: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_EnableMainEventFilter(DevIdx: LongInt; enable: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_SetFilterTestMode(DevIdx: LongInt; testmode: LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetRowFilteredRates(DevIdx: LongInt; var syncrate: LongInt; var cntrates:  LongInt): LongInt; stdcall; external LIB_NAME;
+function MH_GetMainFilteredRates(DevIdx: LongInt; var syncrate: LongInt; var cntrates: LongInt): LongInt; stdcall; external LIB_NAME;
 
 //for debugging only
 function MH_GetDebugInfo(DevIdx: LongInt; debuginfo: PAnsiChar): LongInt; stdcall; external LIB_NAME;

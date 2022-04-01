@@ -1,6 +1,6 @@
 MHLib Programming Library for MultiHarp 150/160 
-Version 3.0.0.0
-PicoQuant GmbH - March 2021
+Version 3.1.0.0
+PicoQuant GmbH - March 2022
 
 
 
@@ -9,13 +9,26 @@ Introduction
 The MultiHarp 150/160 is a TCSPC system with USB 3.0 interface. 
 The system requires a 686 class PC with suitable USB host controller,
 4 GB of memory, two or more CPU cores and at least 2 GHz CPU clock. 
-The MultiHarp software is supported on Windows 8.1 and Windows 10 
+The MultiHarp software is supported on Windows 8.1, 10 and 11 
 including the x64 versions. 
 The programming library is a DLL with demos for various programming 
 languages. Please refer to the manual (PDF) for instructions.
 
 
-What's new in version 3.0
+What's new in version 3.1
+
+- Supports event filtering in hardware 
+- Supports compression of overflow records in TTTR mode 
+  and enables a mild compression by default  
+- Provides a new function MH_SetSyncChannelEnable
+- Allows measurements over 100h under software control
+- New demos for instant TTTR data processing
+- New demos for event filtering
+- New demos for multiple devices
+- Now officially supporting Windows 11
+
+
+What was new in version 3.0
 
 - Support of the new hardware model MultiHarp 160 
 - Support of the external FPGA interface (EFI) of the MultiHarp 160 
@@ -66,7 +79,7 @@ permission of PicoQuant GmbH.
 
 Acknowledgements
 
-The MultiHarp hardware in its current version as of March 2021 
+The MultiHarp hardware in its current version as of March 2022 
 uses the White Rabbit PTP core v. 4.0
 (https://www.ohwr.org/projects/wr-cores/wiki/wrpc-release-v40) licensed 
 under the CERN Open Hardware Licence v1.1 and its embedded WRPC software 
